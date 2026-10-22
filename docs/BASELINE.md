@@ -162,6 +162,8 @@ was used to hide them. Address them in the acquisition-correctness milestone.
 
 ## Preserved evidence
 
+Captured console logs have trailing whitespace removed for clean Git diffs.
+
 - [Exact upstream build log](baseline-upstream.log).
 - [First runnable test harness and lint log](baseline-harness-first-run.log).
 - [Original lint findings](baseline-lint.txt).

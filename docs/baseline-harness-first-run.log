@@ -1,5 +1,5 @@
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
-Daemon will be stopped at the end of the build 
+Daemon will be stopped at the end of the build
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
@@ -119,7 +119,7 @@ Execution failed for task ':app:testDebugUnitTest'.
 * What went wrong:
 Execution failed for task ':app:lintDebug'.
 > Lint found errors in the project; aborting build.
-  
+
   Fix the issues identified by lint, or create a baseline to see only new errors.
   To create a baseline, run `gradlew updateLintBaseline` after adding the following to the module's build.gradle file:
   ```
@@ -130,13 +130,13 @@ Execution failed for task ':app:lintDebug'.
   }
   ```
   For more details, see https://developer.android.com/studio/write/lint#snapshot
-  
+
   Lint found 2 errors, 65 warnings, 1 hint. First failure:
-  
+
   /Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/cellular/CellularScanner.kt:252: Error: Call requires API level 28 (current min is 26): android.telephony.CellIdentityLte#getMccString [NewApi]
           val mcc = identity.mccString?.toIntOrNull()
                              ~~~~~~~~~
-  
+
   The full lint text report is located at:
     /Users/nsvarich/Documents/dev/openemf-android/app/build/intermediates/lint_intermediate_text_report/debug/lintReportDebug/lint-results-debug.txt
 
