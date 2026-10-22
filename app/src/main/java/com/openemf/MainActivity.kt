@@ -22,6 +22,8 @@ import com.openemf.sensors.api.EMFSensorModule
 import com.openemf.sensors.api.PermissionPolicy
 import com.openemf.sensors.api.androidName
 import com.openemf.data.preferences.PreferencesRepository
+import com.openemf.recording.RecordingController
+import com.openemf.recording.RecordingStateStore
 import com.openemf.ui.navigation.OpenEMFNavGraph
 import com.openemf.ui.theme.OpenEMFTheme
 import com.openemf.ui.theme.ThemeMode
@@ -38,6 +40,15 @@ class MainActivity : ComponentActivity() {
     lateinit var preferencesRepository: PreferencesRepository
 
     @Inject lateinit var sensorModule: EMFSensorModule
+    @Inject lateinit var recording: RecordingController
+    @Inject lateinit var recordingState: RecordingStateStore
+    private var pendingRecordingInterval: Long? = null
+
+    private val recordingNotificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        val interval = pendingRecordingInterval
+        pendingRecordingInterval = null
+        if (granted && interval != null) recording.start(interval) else if (!granted) recording.notificationDenied()
+    }
 
     private val requiredPermissions: Array<String>
         get() = PermissionPolicy.required(Build.VERSION.SDK_INT).map { it.androidName }.toTypedArray()
@@ -48,11 +59,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
+        recordingState.setAppVisible(true)
         sensorModule.setForeground(true)
         sensorModule.checkPermissions()
     }
 
     override fun onStop() {
+        recordingState.setAppVisible(false)
         sensorModule.setForeground(false)
         super.onStop()
     }
@@ -79,6 +92,13 @@ class MainActivity : ComponentActivity() {
                     OpenEMFNavGraph(
                         navController = navController,
                         onRequestPermissions = { requestPermissions() },
+                        onStartRecording = { interval ->
+                            if (ContextCompat.checkSelfPermission(this,
+                                    Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                pendingRecordingInterval = interval
+                                recordingNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else recording.start(interval)
+                        },
                         onOpenUrl = { url -> openUrl(url) }
                     )
                 }

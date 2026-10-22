@@ -1,0 +1,222 @@
+{
+  "date": "2026-10-22",
+  "phase": "explicit service-owned background recording and durable recording sessions",
+  "previous_history_checkpoint": "4646f41c6cc21f8f29e2c4d7da9c979ee22f53c3",
+  "separate_minimum_android_commit": "a29377c",
+  "scope": "Pixel 9 Pro XL on user-reported Android 17; older Android support excluded; fresh installations only",
+  "database_name": "openemf_signal_history",
+  "schema_version": 2,
+  "schema_identity": "3be9798dd8822c0f8cd7d0d21b59ee04",
+  "schema_file": "app/schemas/com.openemf.data.database.OpenEMFDatabase/2.json",
+  "schema_sha256": "0e20bf733c5cd8a1aec26a8862e9828cda64752b97d2f744c23e902caa670089",
+  "schema_1_snapshot_unchanged": true,
+  "migration_implemented": false,
+  "legacy_import_implemented": false,
+  "destructive_fallback_implemented": false,
+  "tests": {
+    "tests": 167,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "name": "com.openemf.data.HistoryStorageTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.data.RawObservationCsvTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.recording.RecordingAndroidContractTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.recording.RecordingJournalTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.recording.RecordingPolicyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.recording.RecordingRunnerTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.AcquisitionLifecycleTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.AcquisitionPolicyTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.EScoreCalculatorTest",
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ExposureIndexTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.PermissionPolicyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.RegulatoryGuidelinesTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanReservationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanSchedulerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.SourceDetailsTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.WifiChannelsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "new_recording_tests": 28,
+  "robolectric": "4.17",
+  "host_android_contract_and_sqlite_api": 37,
+  "lint": {
+    "Error": 0,
+    "Warning": 73,
+    "Hint": 1
+  },
+  "lint_by_id": {
+    "AutoboxingStateCreation": 1,
+    "DefaultLocale": 16,
+    "IconLocation": 1,
+    "ModifierParameter": 1,
+    "MonochromeLauncherIcon": 6,
+    "NotShrinkingResources": 1,
+    "ObsoleteSdkInt": 35,
+    "UnusedResources": 8,
+    "UseKtx": 3,
+    "UseTomlInstead": 2
+  },
+  "lint_note": "Minimum API 37 makes inherited guards obsolete (35 ObsoleteSdkInt warnings); no older-version paths added to recording.",
+  "build": {
+    "successful": true,
+    "duration_seconds": 49,
+    "actionable_tasks": 63,
+    "tasks_executed": 17,
+    "tasks_up_to_date": 46,
+    "log": "recording-build.log",
+    "command": "env JAVA_HOME='/Applications/Android Studio.app/Contents/jbr/Contents/Home' ANDROID_HOME=/Users/nsvarich/Library/Android/sdk ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug --continue --no-daemon --console=plain --warning-mode all"
+  },
+  "jdk": "Android Studio JBR 25.0.3",
+  "gradle": "9.8.2",
+  "agp": "9.4.1",
+  "kotlin": "2.4.21",
+  "compileSdk": 37,
+  "targetSdk": 37,
+  "minSdk": 37,
+  "recording": {
+    "foreground_service": "com.openemf.recording.RecordingService",
+    "exported": false,
+    "stop_with_task": false,
+    "restart_mode": "START_NOT_STICKY",
+    "types_declared": [
+      "location",
+      "connectedDevice"
+    ],
+    "connected_device_type_used_only_for_bluetooth": true,
+    "notification_controls": [
+      "Pause",
+      "Resume",
+      "Stop"
+    ],
+    "notification_dismissal_requests_stop": true,
+    "notification_permission_and_channel_required_by_app": true,
+    "start_requires_visible_ui_and_process_local_request": true,
+    "session_scoped_immutable_command_intents": true,
+    "default_interval_ms": 60000,
+    "interval_range_ms": [
+      30000,
+      600000
+    ],
+    "wake_lease": "Unpaused only, per interval + 60 seconds, bounded at 11 minutes; released on pause/stop/failure/service destruction.",
+    "background_location_permission": false,
+    "boot_receiver_or_automatic_restart": false,
+    "ble_screen_off_reported_as_partial": true,
+    "unclosed_journal_recovery": "Interrupted, unknown end timestamp; no automatic resume",
+    "clear_history_rejected_while_active": true,
+    "automatic_app_backup_enabled": false,
+    "automatic_transfer_data_exclusions": true
+  },
+  "apk_path": "app/build/outputs/apk/debug/app-debug.apk",
+  "apk_sha256": "fe8d36050ab36fa7a3cce91a7e62d88de8016486a6e31206161afc73f98c5811",
+  "apk_size_bytes": 75462032,
+  "apk_min_api_verified": 37,
+  "apk_v2_signature_verified": true,
+  "signature_command": "env JAVA_HOME='/Applications/Android Studio.app/Contents/jbr/Contents/Home' /Users/nsvarich/Library/Android/sdk/build-tools/36.0.0/apksigner verify --verbose app/build/outputs/apk/debug/app-debug.apk",
+  "user_reported_pixel_android_version": "17",
+  "user_reported_pixel_version_date": "2026-10-22",
+  "pixel_release_api_build_read_from_device": false,
+  "physical_device_tests_performed": false,
+  "emulator_tests_performed": false,
+  "real_foreground_service_enforcement_tested": false,
+  "notification_drawer_controls_exercised": false,
+  "screen_off_radio_and_power_behavior_tested": false,
+  "device_testing_deferred_by_user": true,
+  "electrosmart_reference_modified": false
+}

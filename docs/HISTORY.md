@@ -1,6 +1,9 @@
 # Durable observations and raw CSV
 
 Milestone 3, 2026-10-22, following acquisition and toolchain checkpoint `a6e3dfc`.
+This page records history checkpoint `4646f41`. The subsequent
+[recording milestone](RECORDING.md) adds session journals in fresh-install
+schema 2; the schema-1 snapshot and results below remain historical evidence.
 
 ## Fresh-install scope
 

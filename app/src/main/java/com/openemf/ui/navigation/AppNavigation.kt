@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import com.openemf.data.database.MeasurementEntity
@@ -17,6 +18,7 @@ import com.openemf.sensors.api.*
 import com.openemf.ui.screens.DashboardScreen
 import com.openemf.ui.screens.StatisticsScreen
 import com.openemf.ui.screens.SolutionsScreen
+import com.openemf.recording.RecordingState
 
 /**
  * Navigation destinations for the app.
@@ -59,6 +61,9 @@ fun MainAppScaffold(
     lastMeasurement: Measurement?,
     measurementHistory: List<MeasurementEntity>,
     historyError: String?,
+    recordingState: RecordingState,
+    recordingContent: @Composable () -> Unit,
+    onStopRecording: () -> Unit,
     onScanClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onHistoryClick: () -> Unit,
@@ -69,23 +74,32 @@ fun MainAppScaffold(
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                NavDestination.entries.forEach { destination ->
-                    NavigationBarItem(
-                        selected = currentDestination == destination,
-                        onClick = { currentDestination = destination },
-                        icon = {
-                            Icon(
-                                imageVector = if (currentDestination == destination) {
-                                    destination.selectedIcon
-                                } else {
-                                    destination.unselectedIcon
-                                },
-                                contentDescription = destination.label
-                            )
-                        },
-                        label = { Text(destination.label) }
-                    )
+            Column {
+                if (recordingState.active) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("Recording: ${recordingState.phase.name.lowercase()}")
+                        TextButton(onClick = onStopRecording) { Text("Stop") }
+                    }
+                }
+                NavigationBar {
+                    NavDestination.entries.forEach { destination ->
+                        NavigationBarItem(
+                            selected = currentDestination == destination,
+                            onClick = { currentDestination = destination },
+                            icon = {
+                                Icon(
+                                    imageVector = if (currentDestination == destination) {
+                                        destination.selectedIcon
+                                    } else {
+                                        destination.unselectedIcon
+                                    },
+                                    contentDescription = destination.label
+                                )
+                            },
+                            label = { Text(destination.label) }
+                        )
+                    }
                 }
             }
         },
@@ -96,6 +110,8 @@ fun MainAppScaffold(
             NavDestination.LIVE -> {
                 DashboardScreen(
                     sensorState = sensorState,
+                    recordingContent = recordingContent,
+                    scansEnabled = !recordingState.active,
                     scanBudget = scanBudget,
                     lastMeasurement = lastMeasurement,
                     onScanClick = onScanClick,
@@ -115,6 +131,8 @@ fun MainAppScaffold(
                 // Show Live screen while browser opens
                 DashboardScreen(
                     sensorState = sensorState,
+                    recordingContent = recordingContent,
+                    scansEnabled = !recordingState.active,
                     scanBudget = scanBudget,
                     lastMeasurement = lastMeasurement,
                     onScanClick = onScanClick,

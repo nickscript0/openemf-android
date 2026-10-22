@@ -55,7 +55,9 @@ fun DashboardScreen(
     onHistoryClick: () -> Unit,
     onSolutionsClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    recordingContent: @Composable () -> Unit = {},
+    scansEnabled: Boolean = true
 ) {
     val scrollState = rememberScrollState()
     val isScanning = sensorState is SensorState.Scanning
@@ -76,7 +78,7 @@ fun DashboardScreen(
                     // Small scan button with tooltip
                     IconButton(
                         onClick = onScanClick,
-                        enabled = !isScanning
+                        enabled = !isScanning && scansEnabled
                     ) {
                         if (isScanning) {
                             CircularProgressIndicator(
@@ -113,6 +115,7 @@ fun DashboardScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                recordingContent()
                 // E-Score display
                 val score = currentScore?.score ?: 0
             val label = "Relative received-signal index"

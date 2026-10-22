@@ -22,7 +22,7 @@ import java.io.Writer
 import java.util.UUID
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35], application = Application::class)
+@Config(sdk = [37], application = Application::class)
 class HistoryStorageTest {
     private lateinit var context: Context
     private lateinit var database: OpenEMFDatabase
@@ -36,7 +36,7 @@ class HistoryStorageTest {
     }
     private fun reopen() {
         database = Room.databaseBuilder(context, OpenEMFDatabase::class.java, databaseName).build()
-        repository = MeasurementRepository(database, database.measurementDao(), database.placeDao(), database.observationDao())
+        repository = MeasurementRepository(database, database.measurementDao(), database.placeDao(), database.observationDao(), com.openemf.recording.RecordingStateStore())
     }
     @After fun close() { database.close(); context.deleteDatabase(databaseName) }
 

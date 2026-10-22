@@ -4,6 +4,7 @@ import com.openemf.data.database.*
 import com.openemf.sensors.api.*
 import androidx.room.withTransaction
 import com.openemf.data.export.RawObservationCsv
+import com.openemf.recording.RecordingStateStore
 import java.io.Writer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -22,7 +23,8 @@ class MeasurementRepository @Inject constructor(
     private val database: OpenEMFDatabase,
     private val measurementDao: MeasurementDao,
     private val placeDao: PlaceDao,
-    private val observationDao: ObservationDao
+    private val observationDao: ObservationDao,
+    private val recordingState: RecordingStateStore
 ) {
     // ==================== Measurements ====================
 
@@ -109,7 +111,9 @@ class MeasurementRepository @Inject constructor(
      */
     suspend fun deleteAllMeasurements() {
         database.withTransaction {
+            check(!recordingState.state.value.active) { "Stop recording before clearing history" }
             measurementDao.deleteAll() // Foreign keys also remove observations, captures, and statuses.
+            database.recordingSessionDao().deleteAll()
             placeDao.getAll().forEach { place ->
                 placeDao.updateStats(place.id, 0, 0, null)
             }

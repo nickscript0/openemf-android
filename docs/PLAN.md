@@ -155,9 +155,14 @@ or phone compatibility as verified without actually exercising them.
   139 tests pass; lint has zero errors, 43 warnings, and one hint. The user
   explicitly cancelled the prototype-schema migration and confirmed fresh
   installations for all users; the new history database is created directly.
-- Next implementation milestone: explicitly started foreground-service recording
-  with notification controls, independent of the UI. Technical charts remain
-  part of the following UI milestone.
+- Explicitly started foreground-service recording with notification Pause/Resume/
+  Stop controls and durable session journals is implemented and host-validated.
+  All 167 tests pass, including Android contract/Room checks on API 37; lint has
+  zero errors, 73 warnings, and one hint. See [RECORDING.md](RECORDING.md) for
+  execution, power, permission, scan-limit, and interruption behavior. Physical
+  service enforcement, screen-off recording, and notification UI remain untested.
+- Next implementation milestone: technical signal lists/details and durable
+  history charts alongside the relative received-signal dashboard.
 - The user reports Android 17 on the Pixel and explicitly excludes older Android
   support. Minimum SDK is raised separately to API 37. Device testing remains
   deferred; the phone's release/API/build have not been read through ADB, and no

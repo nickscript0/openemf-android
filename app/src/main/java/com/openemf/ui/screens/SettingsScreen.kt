@@ -33,6 +33,8 @@ fun SettingsScreen(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     clearHistoryState: OperationState = OperationState.Idle,
     exportState: ExportState = ExportState.Idle,
+    recordingContent: @Composable () -> Unit = {},
+    recordingActive: Boolean = false,
     onBackClick: () -> Unit,
     onRequestPermissions: () -> Unit,
     onMonitoringToggle: (Boolean) -> Unit,
@@ -71,6 +73,7 @@ fun SettingsScreen(
                 .padding(padding)
                 .verticalScroll(scrollState)
         ) {
+            Box(Modifier.padding(16.dp)) { recordingContent() }
             // Permissions section
             SettingsSection(title = "Permissions") {
                 PermissionItem(
@@ -139,6 +142,7 @@ fun SettingsScreen(
                     title = "Refresh While App Is Open",
                     subtitle = "Refresh measurements while this app is visible",
                     checked = monitoringEnabled,
+                    enabled = !recordingActive,
                     onCheckedChange = onMonitoringToggle
                 )
 
@@ -209,7 +213,7 @@ fun SettingsScreen(
                         is OperationState.Loading -> "Clearing..."
                         is OperationState.Success -> "History cleared"
                         is OperationState.Error -> clearHistoryState.message
-                        else -> "Delete all stored measurements"
+                        else -> if (recordingActive) "Stop recording before clearing history" else "Delete all stored measurements"
                     },
                     onClick = { showClearHistoryDialog = true }
                 )
@@ -316,6 +320,7 @@ private fun SettingsToggle(
     title: String,
     subtitle: String,
     checked: Boolean,
+    enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     ListItem(
@@ -327,6 +332,7 @@ private fun SettingsToggle(
         trailingContent = {
             Switch(
                 checked = checked,
+                enabled = enabled,
                 onCheckedChange = onCheckedChange
             )
         }

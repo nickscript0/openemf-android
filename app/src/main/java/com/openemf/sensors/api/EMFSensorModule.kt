@@ -22,6 +22,9 @@ interface EMFSensorModule {
     
     /** Perform a single measurement (foreground, user-triggered) */
     suspend fun measureNow(): Result<Measurement>
+
+    /** Only an active, promoted recording service may use this path. */
+    suspend fun record(sessionId: String, modalities: Set<Modality>): Result<Measurement>
     
     /** Start continuous monitoring */
     fun startMonitoring(config: MonitoringConfig)

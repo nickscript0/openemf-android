@@ -14,9 +14,10 @@ import java.time.Instant
         PlaceEntity::class,
         CaptureEntity::class,
         RadioAcquisitionEntity::class,
-        SignalObservationEntity::class
+        SignalObservationEntity::class,
+        RecordingSessionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -24,6 +25,7 @@ abstract class OpenEMFDatabase : RoomDatabase() {
     abstract fun measurementDao(): MeasurementDao
     abstract fun placeDao(): PlaceDao
     abstract fun observationDao(): ObservationDao
+    abstract fun recordingSessionDao(): RecordingSessionDao
 }
 
 // ==================== Entities ====================

@@ -14,6 +14,7 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
 import android.os.SystemClock
+import android.os.PowerManager
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
 import com.openemf.sensors.api.*
@@ -49,6 +50,8 @@ class BluetoothScanner @Inject constructor(@ApplicationContext private val conte
         val devices = LatestObservations<BluetoothSource>()
         var bleAvailable = false
         var classicStarted = false
+        val power = context.getSystemService(PowerManager::class.java)
+        var screenOff = power?.isInteractive == false
         return try {
             withTimeoutOrNull(durationMs.coerceIn(1, 15_000)) {
                 callbackFlow {
@@ -69,6 +72,7 @@ class BluetoothScanner @Inject constructor(@ApplicationContext private val conte
                     }
                     val receiver = object : BroadcastReceiver() {
                         override fun onReceive(ctx: Context?, intent: Intent?) {
+                            if (intent?.action == Intent.ACTION_SCREEN_OFF) { screenOff = true; return }
                             if (intent?.action != BluetoothDevice.ACTION_FOUND) return
                             try {
                                 @Suppress("DEPRECATION")
@@ -83,7 +87,9 @@ class BluetoothScanner @Inject constructor(@ApplicationContext private val conte
                         }
                     }
                     try {
-                        ContextCompat.registerReceiver(context, receiver, IntentFilter(BluetoothDevice.ACTION_FOUND), ContextCompat.RECEIVER_EXPORTED)
+                        ContextCompat.registerReceiver(context, receiver, IntentFilter(BluetoothDevice.ACTION_FOUND).apply {
+                            addAction(Intent.ACTION_SCREEN_OFF)
+                        }, ContextCompat.RECEIVER_EXPORTED)
                         registered = true
                         if (scanner != null) {
                             scanner.startScan(null, ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).setReportDelay(0).build(), callback)
@@ -105,12 +111,8 @@ class BluetoothScanner @Inject constructor(@ApplicationContext private val conte
                     }
                 }.collect { devices.add(it) }
             }
-            AcquisitionResult(devices.snapshot(), if (classicStarted && bleAvailable) AcquisitionStatus.UPDATED else AcquisitionStatus.PARTIAL,
-                when {
-                    !classicStarted -> "BLE results only: Android refused Classic discovery"
-                    !bleAvailable -> "Classic results only: BLE scanner unavailable"
-                    else -> "BLE and Classic discovery window completed; only discoverable devices can be measured"
-                })
+            AcquisitionResult(devices.snapshot(), discoveryReport(classicStarted, bleAvailable,
+                screenOff || power?.isInteractive == false))
         } catch (e: CancellationException) { throw e
         } catch (e: SecurityException) {
             AcquisitionResult(emptyList(), AcquisitionStatus.PERMISSION_DENIED, "Bluetooth permission was revoked")

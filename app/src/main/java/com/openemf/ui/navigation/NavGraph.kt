@@ -18,6 +18,8 @@ import com.openemf.ui.screens.*
 import com.openemf.ui.theme.ThemeMode
 import com.openemf.ui.viewmodel.DashboardViewModel
 import com.openemf.ui.viewmodel.SettingsViewModel
+import com.openemf.ui.viewmodel.RecordingViewModel
+import com.openemf.ui.components.RecordingControls
 
 /**
  * Navigation routes for the app.
@@ -42,10 +44,19 @@ sealed class Screen(val route: String) {
 fun OpenEMFNavGraph(
     navController: NavHostController = rememberNavController(),
     onRequestPermissions: () -> Unit,
+    onStartRecording: (Long) -> Unit,
     onOpenUrl: (String) -> Unit
 ) {
     val dashboardViewModel: DashboardViewModel = hiltViewModel()
     val settingsViewModel: SettingsViewModel = hiltViewModel()
+    val recordingViewModel: RecordingViewModel = hiltViewModel()
+    val recordingState by recordingViewModel.state.collectAsState()
+    val sessions by recordingViewModel.recentSessions.collectAsState()
+    val journalError by recordingViewModel.journalError.collectAsState()
+    val recordingControls: @Composable () -> Unit = {
+        RecordingControls(recordingState, sessions.firstOrNull(), journalError, onStartRecording,
+            recordingViewModel::pause, recordingViewModel::resume, recordingViewModel::stop)
+    }
 
     // Collect states
     val sensorState by dashboardViewModel.sensorState.collectAsState()
@@ -74,8 +85,11 @@ fun OpenEMFNavGraph(
                 lastMeasurement = lastMeasurement,
                 measurementHistory = measurementHistory,
                 historyError = historyError,
+                recordingState = recordingState,
+                recordingContent = recordingControls,
+                onStopRecording = recordingViewModel::stop,
                 onHistoryClick = { navController.navigate(Screen.History.route) },
-                onScanClick = { dashboardViewModel.measureNow() },
+                onScanClick = { if (!recordingState.active) dashboardViewModel.measureNow() },
                 onSettingsClick = { navController.navigate(Screen.Settings.route) }
             )
         }
@@ -157,6 +171,8 @@ fun OpenEMFNavGraph(
                 themeMode = themeMode,
                 clearHistoryState = clearHistoryState,
                 exportState = exportState,
+                recordingContent = recordingControls,
+                recordingActive = recordingState.active,
                 onBackClick = { navController.popBackStack() },
                 onRequestPermissions = onRequestPermissions,
                 onMonitoringToggle = { settingsViewModel.setMonitoringEnabled(it) },

@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.openemf.recording.RecordingStateStore
 
 /**
  * ViewModel for the Settings screen.
@@ -21,7 +22,8 @@ class SettingsViewModel @Inject constructor(
     private val sensorModule: EMFSensorModule,
     private val preferencesRepository: PreferencesRepository,
     private val measurementRepository: MeasurementRepository,
-    private val rawCsvExporter: RawCsvExporter
+    private val rawCsvExporter: RawCsvExporter,
+    private val recordingState: RecordingStateStore
 ) : ViewModel() {
 
     /** State for clear history operation */
@@ -115,6 +117,10 @@ class SettingsViewModel @Inject constructor(
      */
     fun clearHistory() {
         viewModelScope.launch {
+            if (recordingState.state.value.active) {
+                _clearHistoryState.value = OperationState.Error("Stop recording before clearing history")
+                return@launch
+            }
             _clearHistoryState.value = OperationState.Loading
             try {
                 measurementRepository.deleteAllMeasurements()
