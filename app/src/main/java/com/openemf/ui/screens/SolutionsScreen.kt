@@ -149,7 +149,7 @@ private fun ContextualAdviceCard(measurement: Measurement) {
     val adviceList = mutableListOf<Pair<ImageVector, String>>()
 
     // WiFi advice
-    val strongWifi = measurement.wifiSources.filter { it.rssi > -50 }
+    val strongWifi = measurement.wifiSources.filter { it.rssi?.let { value -> value > -50 } == true }
     if (strongWifi.isNotEmpty()) {
         adviceList.add(
             Icons.Default.Wifi to "Strong WiFi signal detected. Moving 2m away from your router could reduce WiFi exposure by 75%."
@@ -165,7 +165,7 @@ private fun ContextualAdviceCard(measurement: Measurement) {
     }
 
     // Cellular advice
-    val weakCellular = measurement.cellularSources.filter { it.rssi < -100 }
+    val weakCellular = measurement.cellularSources.filter { it.rssi?.let { value -> value < -100 } == true }
     if (weakCellular.isNotEmpty()) {
         adviceList.add(
             Icons.Default.CellTower to "Weak cellular signal increases phone transmit power. Moving to better coverage reduces exposure."

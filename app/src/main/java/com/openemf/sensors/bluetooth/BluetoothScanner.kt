@@ -1,273 +1,149 @@
 package com.openemf.sensors.bluetooth
 
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
+import android.os.SystemClock
 import androidx.core.content.ContextCompat
-import com.openemf.sensors.api.BluetoothDeviceType
-import com.openemf.sensors.api.BluetoothSource
+import androidx.core.location.LocationManagerCompat
+import com.openemf.sensors.api.*
+import com.openemf.sensors.acquisition.LatestObservations
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.suspendCancellableCoroutine
-import java.util.UUID
+import kotlinx.coroutines.withTimeoutOrNull
+import java.time.Instant
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.resume
 
-/**
- * Bluetooth scanner using BLE (Bluetooth Low Energy) for device discovery.
- * Handles both classic and BLE devices.
- */
+/** BLE advertisements and discoverable Classic devices; pairing never supplies a signal. */
 @Singleton
-class BluetoothScanner @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
-    private val bluetoothManager: BluetoothManager? by lazy {
-        context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-    }
+class BluetoothScanner @Inject constructor(@ApplicationContext private val context: Context) {
+    private val adapter get() = (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+    private fun granted(permission: String) = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+    fun hasPermissions(): Boolean = if (Build.VERSION.SDK_INT >= 31) {
+        granted(Manifest.permission.BLUETOOTH_SCAN) && granted(Manifest.permission.BLUETOOTH_CONNECT)
+    } else granted(Manifest.permission.ACCESS_FINE_LOCATION)
+    fun isAvailable(): Boolean = hasPermissions() && runCatching { adapter?.isEnabled == true }.getOrDefault(false)
 
-    private val bluetoothAdapter: BluetoothAdapter? by lazy {
-        bluetoothManager?.adapter
-    }
-
-    private val leScanner: BluetoothLeScanner? by lazy {
-        bluetoothAdapter?.bluetoothLeScanner
-    }
-
-    private val handler = Handler(Looper.getMainLooper())
-
-    companion object {
-        private const val SCAN_DURATION_MS = 5000L // 5 seconds
-    }
-
-    /**
-     * Check if Bluetooth is available and enabled.
-     */
-    fun isAvailable(): Boolean {
-        return bluetoothAdapter?.isEnabled == true
-    }
-
-    /**
-     * Check if we have required permissions.
-     */
-    fun hasPermissions(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+
-            val scanPermission = ContextCompat.checkSelfPermission(
-                context, Manifest.permission.BLUETOOTH_SCAN
-            ) == PackageManager.PERMISSION_GRANTED
-
-            val connectPermission = ContextCompat.checkSelfPermission(
-                context, Manifest.permission.BLUETOOTH_CONNECT
-            ) == PackageManager.PERMISSION_GRANTED
-
-            scanPermission && connectPermission
-        } else {
-            // Pre-Android 12
-            ContextCompat.checkSelfPermission(
-                context, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+    suspend fun scan(durationMs: Long = 5_000): AcquisitionResult<BluetoothSource> {
+        if (!hasPermissions()) return AcquisitionResult(emptyList(), AcquisitionStatus.PERMISSION_DENIED, "Bluetooth scan/connect permission is required")
+        if (Build.VERSION.SDK_INT < 31 && (context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager)
+                ?.let { LocationManagerCompat.isLocationEnabled(it) } != true) {
+            return AcquisitionResult(emptyList(), AcquisitionStatus.LOCATION_DISABLED, "Enable Android Location services for Bluetooth discovery")
         }
-    }
-
-    /**
-     * Perform a BLE scan for the specified duration.
-     */
-    suspend fun scan(durationMs: Long = SCAN_DURATION_MS): Result<List<BluetoothSource>> =
-        suspendCancellableCoroutine { continuation ->
-            val scanner = leScanner
-            if (scanner == null) {
-                continuation.resume(Result.failure(BluetoothScanException("BLE scanner not available")))
-                return@suspendCancellableCoroutine
-            }
-
-            if (!hasPermissions()) {
-                continuation.resume(Result.failure(BluetoothScanException("Missing permissions")))
-                return@suspendCancellableCoroutine
-            }
-
-            val devices = mutableMapOf<String, BluetoothSource>()
-            var isCompleted = false
-
-            val callback = object : ScanCallback() {
-                override fun onScanResult(callbackType: Int, result: ScanResult) {
-                    val source = result.toBluetoothSource()
-                    val existing = devices[source.address]
-                    if (existing == null || source.rssi > existing.rssi) {
-                        devices[source.address] = source
-                    }
-                }
-
-                override fun onBatchScanResults(results: List<ScanResult>) {
-                    results.forEach { result ->
-                        val source = result.toBluetoothSource()
-                        val existing = devices[source.address]
-                        if (existing == null || source.rssi > existing.rssi) {
-                            devices[source.address] = source
+        val radio = adapter ?: return AcquisitionResult(emptyList(), AcquisitionStatus.UNAVAILABLE, "Bluetooth hardware unavailable")
+        if (!isAvailable()) return AcquisitionResult(emptyList(), AcquisitionStatus.RADIO_DISABLED, "Bluetooth is disabled")
+        val devices = LatestObservations<BluetoothSource>()
+        var bleAvailable = false
+        var classicStarted = false
+        return try {
+            withTimeoutOrNull(durationMs.coerceIn(1, 15_000)) {
+                callbackFlow {
+                    var registered = false
+                    var bleStarted = false
+                    var ownsDiscovery = false
+                    val scanner = radio.bluetoothLeScanner
+                    val callback = object : ScanCallback() {
+                        override fun onScanResult(callbackType: Int, result: ScanResult) {
+                            try { trySend(result.toSource()) } catch (e: SecurityException) { close(e) }
+                        }
+                        override fun onBatchScanResults(results: List<ScanResult>) {
+                            results.forEach { onScanResult(0, it) }
+                        }
+                        override fun onScanFailed(errorCode: Int) {
+                            close(IllegalStateException("BLE scan failed (Android code $errorCode)"))
                         }
                     }
-                }
-
-                override fun onScanFailed(errorCode: Int) {
-                    // Don't fail - we might have partial results
-                }
-            }
-
-            val stopRunnable = Runnable {
-                if (!isCompleted) {
-                    isCompleted = true
+                    val receiver = object : BroadcastReceiver() {
+                        override fun onReceive(ctx: Context?, intent: Intent?) {
+                            if (intent?.action != BluetoothDevice.ACTION_FOUND) return
+                            try {
+                                @Suppress("DEPRECATION")
+                                val device = if (Build.VERSION.SDK_INT >= 33) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                                    else intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                                if (device != null) {
+                                    val dbm = if (intent.hasExtra(BluetoothDevice.EXTRA_RSSI)) intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE).toInt() else null
+                                    trySend(source(device, dbm?.takeUnless { it == Short.MIN_VALUE.toInt() }, BluetoothTransport.CLASSIC,
+                                        SystemClock.elapsedRealtime(), intent.getStringExtra(BluetoothDevice.EXTRA_NAME)))
+                                }
+                            } catch (e: SecurityException) { close(e) }
+                        }
+                    }
                     try {
-                        scanner.stopScan(callback)
-                    } catch (_: SecurityException) {}
-                    continuation.resume(Result.success(devices.values.toList()))
-                }
+                        ContextCompat.registerReceiver(context, receiver, IntentFilter(BluetoothDevice.ACTION_FOUND), ContextCompat.RECEIVER_EXPORTED)
+                        registered = true
+                        if (scanner != null) {
+                            scanner.startScan(null, ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).setReportDelay(0).build(), callback)
+                            bleStarted = true
+                            bleAvailable = true
+                        }
+                        // Observe an existing discovery without cancelling another app's request.
+                        classicStarted = radio.isDiscovering
+                        if (!classicStarted) {
+                            ownsDiscovery = radio.startDiscovery()
+                            classicStarted = ownsDiscovery
+                        }
+                        if (!bleStarted && !classicStarted) close(IllegalStateException("Bluetooth discovery could not start"))
+                        awaitClose { }
+                    } finally {
+                        if (bleStarted) runCatching { scanner?.stopScan(callback) }
+                        if (ownsDiscovery) runCatching { radio.cancelDiscovery() }
+                        if (registered) runCatching { context.unregisterReceiver(receiver) }
+                    }
+                }.collect { devices.add(it) }
             }
-
-            val settings = ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .setReportDelay(0)
-                .build()
-
-            try {
-                scanner.startScan(null, settings, callback)
-            } catch (e: SecurityException) {
-                continuation.resume(Result.failure(BluetoothScanException("Permission denied")))
-                return@suspendCancellableCoroutine
-            }
-
-            // Schedule scan stop
-            handler.postDelayed(stopRunnable, durationMs)
-
-            continuation.invokeOnCancellation {
-                handler.removeCallbacks(stopRunnable)
-                if (!isCompleted) {
-                    isCompleted = true
-                    try {
-                        scanner.stopScan(callback)
-                    } catch (_: SecurityException) {}
-                }
-            }
-        }
-
-    /**
-     * Get bonded (paired) devices.
-     */
-    fun getBondedDevices(): List<BluetoothSource> {
-        if (!hasPermissions()) return emptyList()
-
-        return try {
-            bluetoothAdapter?.bondedDevices?.map { device ->
-                device.toBluetoothSource()
-            } ?: emptyList()
-        } catch (_: SecurityException) {
-            emptyList()
+            AcquisitionResult(devices.snapshot(), if (classicStarted && bleAvailable) AcquisitionStatus.UPDATED else AcquisitionStatus.PARTIAL,
+                when {
+                    !classicStarted -> "BLE results only: Android refused Classic discovery"
+                    !bleAvailable -> "Classic results only: BLE scanner unavailable"
+                    else -> "BLE and Classic discovery window completed; only discoverable devices can be measured"
+                })
+        } catch (e: CancellationException) { throw e
+        } catch (e: SecurityException) {
+            AcquisitionResult(emptyList(), AcquisitionStatus.PERMISSION_DENIED, "Bluetooth permission was revoked")
+        } catch (e: Exception) {
+            AcquisitionResult(devices.snapshot(), AcquisitionStatus.FAILED, "Partial Bluetooth results: ${e.message}")
         }
     }
 
-    /**
-     * Observe BLE devices as a continuous Flow.
-     */
-    fun observeScans(): Flow<List<BluetoothSource>> = callbackFlow {
-        val scanner = leScanner
-        if (scanner == null) {
-            trySend(emptyList())
-            close()
-            return@callbackFlow
-        }
-
-        val devices = mutableMapOf<String, BluetoothSource>()
-
-        val callback = object : ScanCallback() {
-            override fun onScanResult(callbackType: Int, result: ScanResult) {
-                val source = result.toBluetoothSource()
-                devices[source.address] = source
-                trySend(devices.values.toList())
-            }
-
-            override fun onScanFailed(errorCode: Int) {
-                // Continue with partial results
-            }
-        }
-
-        val settings = ScanSettings.Builder()
-            .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
-            .setReportDelay(1000)
-            .build()
-
-        try {
-            scanner.startScan(null, settings, callback)
-        } catch (_: SecurityException) {
-            close()
-            return@callbackFlow
-        }
-
-        awaitClose {
-            try {
-                scanner.stopScan(callback)
-            } catch (_: SecurityException) {}
-        }
+    fun getPairedDevices(): List<PairedBluetoothDevice> {
+        if (Build.VERSION.SDK_INT >= 31 && !granted(Manifest.permission.BLUETOOTH_CONNECT)) return emptyList()
+        return try { adapter?.bondedDevices.orEmpty().map { PairedBluetoothDevice(it.address, it.name) } }
+        catch (_: SecurityException) { emptyList() }
     }
 
-    /**
-     * Convert BLE ScanResult to our BluetoothSource model.
-     */
-    private fun ScanResult.toBluetoothSource(): BluetoothSource {
-        val deviceName = try {
-            device.name
-        } catch (_: SecurityException) {
-            null
+    private fun ScanResult.toSource(): BluetoothSource = source(device,
+        rssi.takeUnless { it == 127 || it == Int.MAX_VALUE }, BluetoothTransport.BLE,
+        timestampNanos / 1_000_000, scanRecord?.deviceName, ObservationTimeBasis.HARDWARE)
+
+    private fun source(device: BluetoothDevice, dbm: Int?, transport: BluetoothTransport,
+                       bootTimeMs: Long, advertisedName: String?,
+                       timeBasis: ObservationTimeBasis = ObservationTimeBasis.EVENT_RECEIPT): BluetoothSource {
+        if (Build.VERSION.SDK_INT >= 31 && ContextCompat.checkSelfPermission(
+                context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            throw SecurityException("Bluetooth device information permission was revoked")
         }
-
-        val deviceType = classifyDevice(deviceName, device)
-
-        return BluetoothSource(
-            id = UUID.randomUUID().toString(),
-            name = deviceName,
-            address = device.address,
-            rssi = rssi,
-            deviceType = deviceType,
-            isConnected = false,
-            contributionPercent = 0
-        )
+        val name = advertisedName ?: device.name
+        return BluetoothSource(id = "bluetooth:${device.address.lowercase(Locale.ROOT)}", name = name,
+            address = device.address, rssi = dbm, deviceType = classifyDevice(name),
+            observation = Observation.fromBootTime(bootTimeMs, SystemClock.elapsedRealtime(), Instant.now(), freshForMs = 30_000, timeBasis = timeBasis),
+            transport = transport)
     }
 
-    /**
-     * Convert bonded BluetoothDevice to our model.
-     */
-    private fun BluetoothDevice.toBluetoothSource(): BluetoothSource {
-        val deviceName = try {
-            name
-        } catch (_: SecurityException) {
-            null
-        }
-
-        return BluetoothSource(
-            id = UUID.randomUUID().toString(),
-            name = deviceName,
-            address = address,
-            rssi = -70,
-            deviceType = classifyDevice(deviceName, this),
-            isConnected = true,
-            contributionPercent = 0
-        )
-    }
-
-    /**
-     * Classify device type based on name and device class.
-     */
-    private fun classifyDevice(name: String?, device: BluetoothDevice): BluetoothDeviceType {
+    private fun classifyDevice(name: String?): BluetoothDeviceType {
         val lowerName = name?.lowercase() ?: ""
 
         return when {
@@ -283,5 +159,3 @@ class BluetoothScanner @Inject constructor(
         }
     }
 }
-
-class BluetoothScanException(message: String) : Exception(message)

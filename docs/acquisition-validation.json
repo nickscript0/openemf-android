@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-22",
+  "phase": "acquisition before toolchain upgrade",
+  "tests": {
+    "tests": 123,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "name": "com.openemf.sensors.AcquisitionLifecycleTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.AcquisitionPolicyTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.EScoreCalculatorTest",
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ExposureIndexTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.PermissionPolicyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.RegulatoryGuidelinesTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanReservationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanSchedulerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.SourceDetailsTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.WifiChannelsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "lint": {
+    "Warning": 67,
+    "Hint": 1
+  },
+  "jdk": "JBR 21.0.11",
+  "gradle": "8.13",
+  "agp": "8.13.2",
+  "compileSdk": 35,
+  "targetSdk": 35,
+  "apk_sha256": "ce4cb166dfe3505a0547bfc78b55bbc8c48d71e5e6cc6f38c19efe7a6b63533e",
+  "device_tests_performed": false
+}

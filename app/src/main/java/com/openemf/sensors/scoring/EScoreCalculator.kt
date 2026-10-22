@@ -43,7 +43,7 @@ class EScoreCalculator @Inject constructor() {
         val GSM_RANGE = -113..-51
         val WCDMA_RANGE = -120..-24
         val LTE_RANGE = -140..-43
-        val NR_RANGE = -140..-43  // 5G NR
+        val NR_RANGE = -156..-31  // Android NR SS-RSRP range
         val CDMA_RANGE = -120..0
     }
 
@@ -90,7 +90,7 @@ class EScoreCalculator @Inject constructor() {
         var totalMw = 0.0
 
         for (source in validSources) {
-            val mw = dbmToMilliwatts(source.rssi)
+            val mw = dbmToMilliwatts(requireNotNull(source.rssi))
             totalMw += mw
             mwByType[source.type] = (mwByType[source.type] ?: 0.0) + mw
         }
@@ -114,7 +114,7 @@ class EScoreCalculator @Inject constructor() {
         }
 
         // Find dominant source (highest power)
-        val dominant = validSources.maxByOrNull { dbmToMilliwatts(it.rssi) }
+        val dominant = validSources.maxByOrNull { dbmToMilliwatts(requireNotNull(it.rssi)) }
 
         return EScoreResult(
             score = score,
@@ -174,8 +174,11 @@ class EScoreCalculator @Inject constructor() {
             }
             else -> -150..0
         }
-        return source.rssi in range
+        return source.rssi?.let { it in range } == true
     }
+
+    fun calculateFresh(sources: List<Source>, nowElapsedMs: Long): EScoreResult =
+        calculate(sources.filter { it.observation.freshness(nowElapsedMs) == Freshness.FRESH })
 
     // ==================== Conversion Utilities ====================
 

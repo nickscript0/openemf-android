@@ -276,7 +276,7 @@ class RegulatoryGuidelinesTest {
         rssi = rssi,
         technology = CellularTechnology.LTE_4G,
         band = 7,
-        cellId = 12345 + index,
+        cellId = (12345 + index).toLong(),
         isRegistered = index == 0,
         contributionPercent = 0
     )

@@ -242,7 +242,7 @@ class RegulatoryGuidelines @Inject constructor() {
 
         // Sum power from all sources (linear, not dB)
         val totalPowerMw = sources.sumOf { source ->
-            dbmToMilliwatts(source.rssi)
+            source.rssi?.let { dbmToMilliwatts(it) } ?: 0.0
         }
 
         // Convert mW to W/m² (rough estimate)
@@ -259,7 +259,7 @@ class RegulatoryGuidelines @Inject constructor() {
 
         // Sum power from all sources
         val totalPowerMw = sources.sumOf { source ->
-            dbmToMilliwatts(source.rssi)
+            source.rssi?.let { dbmToMilliwatts(it) } ?: 0.0
         }
 
         // Cellular has lower frequency, larger effective area ~0.1 m²

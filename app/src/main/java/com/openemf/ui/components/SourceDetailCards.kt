@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.openemf.sensors.api.*
+import android.os.SystemClock
 
 /**
  * Expandable card showing detailed WiFi source information.
@@ -29,7 +30,7 @@ fun WifiSourceDetailCard(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val exposureIndex = calculateExposureIndex(source.rssi)
+    val exposureIndex = calculateExposureIndex(source.rssi.takeIf { source.observation.freshness(SystemClock.elapsedRealtime()) == Freshness.FRESH })
     val indexColor = getExposureIndexColor(exposureIndex)
 
     Card(
@@ -65,7 +66,7 @@ fun WifiSourceDetailCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "$exposureIndex",
+                        text = exposureIndex?.toString() ?: "Unavailable",
                         style = MaterialTheme.typography.titleMedium,
                         color = indexColor
                     )
@@ -96,7 +97,7 @@ fun WifiSourceDetailCard(
                     HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
 
                     DetailRow("BSSID", source.bssid)
-                    DetailRow("Signal", "${source.rssi} dBm")
+                    DetailRow("Signal", source.rssi?.let { "$it dBm" } ?: "Unavailable")
                     DetailRow("Band", source.band.displayName)
                     DetailRow("Channel", "${source.channel}")
 
@@ -127,7 +128,7 @@ fun CellularSourceDetailCard(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val exposureIndex = calculateExposureIndex(source.rssi)
+    val exposureIndex = calculateExposureIndex(source.rssi.takeIf { source.observation.freshness(SystemClock.elapsedRealtime()) == Freshness.FRESH })
     val indexColor = getExposureIndexColor(exposureIndex)
 
     Card(
@@ -163,7 +164,7 @@ fun CellularSourceDetailCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "$exposureIndex",
+                        text = exposureIndex?.toString() ?: "Unavailable",
                         style = MaterialTheme.typography.titleMedium,
                         color = indexColor
                     )
@@ -193,7 +194,7 @@ fun CellularSourceDetailCard(
                 ) {
                     HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
 
-                    DetailRow("Signal", "${source.rssi} dBm")
+                    DetailRow("Signal", source.rssi?.let { "$it dBm" } ?: "Unavailable")
                     DetailRow("Technology", source.technology.displayName)
                     source.band?.let { DetailRow("Band", it.toString()) }
 
@@ -230,7 +231,19 @@ fun CellularSourceDetailCard(
 
                         details.rsrp?.let { DetailRow("RSRP", "$it dBm") }
                         details.rsrq?.let { DetailRow("RSRQ", "$it dB") }
-                        details.rssnr?.let { DetailRow("RSSNR", "$it dB") }
+                        details.rssnrDb?.let { DetailRow("RSSNR", "$it dB") }
+                        details.rssnr?.let { DetailRow("RSSNR (raw Android value)", it.toString()) }
+                        details.nci?.let { DetailRow("NCI (36 bit)", it.toString()) }
+                        details.nrArfcn?.let { DetailRow("NR-ARFCN", it.toString()) }
+                        if (details.bands.isNotEmpty()) DetailRow("Reported bands", details.bands.joinToString())
+                        if (source.technology == CellularTechnology.NR_5G) {
+                            DetailRow("SS-RSRP", details.ssRsrp?.let { "$it dBm" } ?: "Unavailable")
+                            DetailRow("SS-RSRQ", details.ssRsrq?.let { "$it dB" } ?: "Unavailable")
+                            DetailRow("SS-SINR", details.ssSinr?.let { "$it dB" } ?: "Unavailable")
+                            DetailRow("CSI-RSRP", details.csiRsrp?.let { "$it dBm" } ?: "Unavailable")
+                            DetailRow("CSI-RSRQ", details.csiRsrq?.let { "$it dB" } ?: "Unavailable")
+                            DetailRow("CSI-SINR", details.csiSinr?.let { "$it dB" } ?: "Unavailable")
+                        }
                         details.cqi?.let { DetailRow("CQI", it.toString()) }
                         details.ta?.let { DetailRow("Timing Adv", it.toString()) }
 

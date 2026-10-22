@@ -18,6 +18,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
+import com.openemf.sensors.api.EMFSensorModule
+import com.openemf.sensors.api.PermissionPolicy
+import com.openemf.sensors.api.androidName
 import com.openemf.data.preferences.PreferencesRepository
 import com.openemf.ui.navigation.OpenEMFNavGraph
 import com.openemf.ui.theme.OpenEMFTheme
@@ -34,31 +37,24 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
 
+    @Inject lateinit var sensorModule: EMFSensorModule
+
     private val requiredPermissions: Array<String>
-        get() = buildList {
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            add(Manifest.permission.ACCESS_COARSE_LOCATION)
-
-            // Bluetooth permissions for Android 12+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                add(Manifest.permission.BLUETOOTH_SCAN)
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-            }
-
-            // WiFi permission for Android 13+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                add(Manifest.permission.NEARBY_WIFI_DEVICES)
-            }
-        }.toTypedArray()
+        get() = PermissionPolicy.required(Build.VERSION.SDK_INT).map { it.androidName }.toTypedArray()
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        // Permissions result handled - UI will refresh automatically
-        val allGranted = permissions.all { it.value }
-        if (!allGranted) {
-            // Could show a dialog explaining why permissions are needed
-        }
+    ) { sensorModule.checkPermissions() }
+
+    override fun onStart() {
+        super.onStart()
+        sensorModule.setForeground(true)
+        sensorModule.checkPermissions()
+    }
+
+    override fun onStop() {
+        sensorModule.setForeground(false)
+        super.onStop()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

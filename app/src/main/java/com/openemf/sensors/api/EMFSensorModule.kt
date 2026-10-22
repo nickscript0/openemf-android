@@ -14,6 +14,8 @@ interface EMFSensorModule {
     
     /** Current scan budget status */
     val scanBudget: StateFlow<ScanBudget>
+    val permissionStatus: StateFlow<PermissionStatus>
+    val monitoringActive: StateFlow<Boolean>
     
     /** Stream of measurements (for continuous monitoring) */
     val measurements: Flow<Measurement>
@@ -32,4 +34,5 @@ interface EMFSensorModule {
     
     /** Update context (motion state, foreground/background, etc.) */
     fun updateContext(context: MeasurementContext)
+    fun setForeground(isForeground: Boolean)
 }

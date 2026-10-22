@@ -6,239 +6,105 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
+import android.os.SystemClock
 import androidx.core.content.ContextCompat
-import com.openemf.sensors.api.WifiBand
-import com.openemf.sensors.api.WifiChannelWidth
-import com.openemf.sensors.api.WifiSecurity
-import com.openemf.sensors.api.WifiSource
-import com.openemf.sensors.api.WifiStandard
+import androidx.core.location.LocationManagerCompat
+import com.openemf.sensors.api.*
+import com.openemf.sensors.acquisition.callbackScan
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.suspendCancellableCoroutine
-import java.util.UUID
+import kotlinx.coroutines.CancellationException
+import java.time.Instant
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
-/**
- * WiFi scanner that wraps Android's WifiManager.
- * Respects Android 9+ throttling (4 scans per 2 minutes).
- */
 @Singleton
-class WifiScanner @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
-    private val wifiManager: WifiManager? by lazy {
-        context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-    }
+class WifiScanner @Inject constructor(@ApplicationContext private val context: Context) {
+    private val wifiManager get() = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+    private val connectivityManager get() = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
 
-    private val connectivityManager: ConnectivityManager? by lazy {
-        context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-    }
-
-    /**
-     * Check if WiFi scanning is available.
-     */
-    fun isAvailable(): Boolean {
-        return wifiManager?.isWifiEnabled == true || isScanAlwaysAvailable()
-    }
-
-    /**
-     * Check if scan is always available (even with WiFi off).
-     * Note: isScanAlwaysAvailable is deprecated in API 31+ but still functional.
-     * No direct replacement exists - the user setting still controls this behavior.
-     */
     @Suppress("DEPRECATION")
-    private fun isScanAlwaysAvailable(): Boolean {
-        return wifiManager?.isScanAlwaysAvailable == true
-    }
+    fun isAvailable(): Boolean = wifiManager?.let { it.isWifiEnabled || it.isScanAlwaysAvailable } == true
 
-    /**
-     * Check if we have the required permissions.
-     */
-    fun hasPermissions(): Boolean {
-        val fineLocation = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+    fun hasPermissions(): Boolean = granted(Manifest.permission.ACCESS_FINE_LOCATION) ||
+        (Build.VERSION.SDK_INT < 29 && granted(Manifest.permission.ACCESS_COARSE_LOCATION))
 
-        // Android 13+ requires NEARBY_WIFI_DEVICES
-        val nearbyWifi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context, Manifest.permission.NEARBY_WIFI_DEVICES
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true
-        }
+    private fun granted(permission: String) = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+    private fun locationEnabled() = (context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager)
+        ?.let { LocationManagerCompat.isLocationEnabled(it) } == true
 
-        return fineLocation && nearbyWifi
-    }
-
-    /**
-     * Perform a single WiFi scan.
-     * Returns list of detected WiFi sources.
-     */
-    suspend fun scan(): Result<List<WifiSource>> = suspendCancellableCoroutine { continuation ->
-        val manager = wifiManager
-        if (manager == null) {
-            continuation.resume(Result.failure(WifiScanException("WifiManager not available")))
-            return@suspendCancellableCoroutine
-        }
-
-        if (!hasPermissions()) {
-            continuation.resume(Result.failure(WifiScanException("Missing permissions")))
-            return@suspendCancellableCoroutine
-        }
-
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(ctx: Context?, intent: Intent?) {
-                try {
-                    context.unregisterReceiver(this)
-                } catch (_: IllegalArgumentException) {
-                    // Already unregistered
-                }
-
-                val success = intent?.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false) ?: false
-
-                if (success) {
-                    try {
-                        val results = manager.scanResults ?: emptyList()
-                        val sources = results.map { it.toWifiSource(manager) }
-                        continuation.resume(Result.success(sources))
-                    } catch (e: SecurityException) {
-                        continuation.resume(Result.failure(WifiScanException("Permission denied: ${e.message}")))
-                    }
-                } else {
-                    // Even on "failure", we can try to get cached results
-                    try {
-                        val results = manager.scanResults ?: emptyList()
-                        val sources = results.map { it.toWifiSource(manager) }
-                        continuation.resume(Result.success(sources))
-                    } catch (e: SecurityException) {
-                        continuation.resume(Result.failure(WifiScanException("Scan failed and no cached results")))
-                    }
-                }
-            }
-        }
-
-        val filter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-        context.registerReceiver(receiver, filter)
-
-        continuation.invokeOnCancellation {
-            try {
-                context.unregisterReceiver(receiver)
-            } catch (_: IllegalArgumentException) {
-                // Already unregistered
-            }
-        }
-
-        @Suppress("DEPRECATION")
-        val scanStarted = manager.startScan()
-        if (!scanStarted) {
-            // Scan didn't start (throttled), but we might have cached results
-            try {
-                context.unregisterReceiver(receiver)
-            } catch (_: IllegalArgumentException) {}
-
-            try {
-                val results = manager.scanResults ?: emptyList()
-                val sources = results.map { it.toWifiSource(manager) }
-                continuation.resume(Result.success(sources))
-            } catch (e: SecurityException) {
-                continuation.resume(Result.failure(WifiScanException("Scan throttled and no cached results")))
-            }
-        }
-    }
-
-    /**
-     * Get cached scan results without triggering a new scan.
-     */
-    fun getCachedResults(): List<WifiSource> {
-        if (!hasPermissions()) return emptyList()
-
+    suspend fun scan(): AcquisitionResult<WifiSource> {
+        val manager = wifiManager ?: return result(AcquisitionStatus.UNAVAILABLE, "Wi-Fi hardware unavailable")
+        if (!hasPermissions()) return result(AcquisitionStatus.PERMISSION_DENIED, "Precise location permission is required for Wi-Fi scans")
+        if (!locationEnabled()) return result(AcquisitionStatus.LOCATION_DISABLED, "Enable Android Location services for Wi-Fi scans")
+        if (!isAvailable()) return result(AcquisitionStatus.RADIO_DISABLED, "Wi-Fi and scan-always-available are disabled")
         return try {
-            wifiManager?.scanResults?.map { it.toWifiSource(wifiManager!!) } ?: emptyList()
-        } catch (_: SecurityException) {
-            emptyList()
-        }
-    }
-
-    /**
-     * Observe WiFi scan results as a Flow.
-     */
-    fun observeScans(): Flow<List<WifiSource>> = callbackFlow {
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(ctx: Context?, intent: Intent?) {
-                try {
-                    val results = wifiManager?.scanResults ?: emptyList()
-                    val sources = results.map { it.toWifiSource(wifiManager!!) }
-                    trySend(sources)
-                } catch (_: SecurityException) {
-                    trySend(emptyList())
+            callbackScan<AcquisitionResult<WifiSource>>(12_000) { complete, fail ->
+                val receiver = object : BroadcastReceiver() {
+                    override fun onReceive(ctx: Context?, intent: Intent?) {
+                        if (intent?.action != WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) return
+                        try {
+                            val updated = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
+                            complete(AcquisitionResult(readResults(!updated),
+                                if (updated) AcquisitionStatus.UPDATED else AcquisitionStatus.FAILED,
+                                if (updated) null else "Android reported scan failure; displaying cached observations"))
+                        } catch (e: Exception) { fail(e) }
+                    }
                 }
-            }
-        }
-
-        val filter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-        context.registerReceiver(receiver, filter)
-
-        awaitClose {
-            try {
-                context.unregisterReceiver(receiver)
-            } catch (_: IllegalArgumentException) {}
+                // This protected system broadcast can originate from the privileged Wi-Fi process.
+                ContextCompat.registerReceiver(context, receiver,
+                    IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION), ContextCompat.RECEIVER_EXPORTED)
+                try {
+                    @Suppress("DEPRECATION")
+                    val started = manager.startScan()
+                    if (!started) complete(result(AcquisitionStatus.REFUSED,
+                        "Android refused the scan (throttling or radio busy)", getCachedResults()))
+                } catch (e: Exception) { fail(e) }
+                val cleanup: () -> Unit = { runCatching { context.unregisterReceiver(receiver) }; Unit }
+                cleanup
+            } ?: result(AcquisitionStatus.TIMED_OUT, "Wi-Fi scan timed out after 12 seconds", getCachedResults())
+        } catch (e: CancellationException) { throw e
+        } catch (e: SecurityException) {
+            result(AcquisitionStatus.PERMISSION_DENIED, "Wi-Fi permission was denied or revoked")
+        } catch (e: Exception) {
+            result(AcquisitionStatus.FAILED, e.message ?: "Wi-Fi scan failed", getCachedResults())
         }
     }
 
-    /**
-     * Convert Android ScanResult to our WifiSource model.
-     */
-    private fun ScanResult.toWifiSource(manager: WifiManager): WifiSource {
-        val band = when {
-            frequency < 3000 -> WifiBand.WIFI_2_4_GHZ
-            frequency < 6000 -> WifiBand.WIFI_5_GHZ
-            frequency >= 6000 -> WifiBand.WIFI_6_GHZ
-            else -> WifiBand.UNKNOWN
+    fun getCachedResults(): List<WifiSource> = if (!hasPermissions() || !locationEnabled()) emptyList() else
+        try { readResults(true) } catch (_: Exception) { emptyList() }
+
+    private fun readResults(cached: Boolean): List<WifiSource> {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            (Build.VERSION.SDK_INT >= 29 || ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+            throw SecurityException("Location permission was revoked")
         }
+        return wifiManager?.scanResults.orEmpty().map { it.toWifiSource(cached) }
+            .distinctBy { it.bssid.lowercase(Locale.ROOT) }
+    }
 
-        val channel = frequencyToChannel(frequency)
-        val channelWidth = extractChannelWidth()
-        val standard = extractWifiStandard(band)
-        val security = extractSecurity()
+    private fun result(status: AcquisitionStatus, detail: String, sources: List<WifiSource> = emptyList()) =
+        AcquisitionResult(sources, status, detail)
 
-        // Check if this is the connected network using modern API
-        val connectedBssid = getConnectedBssid()
-
-        // Extract SSID - API 33+ may return null for privacy, handle gracefully
-        val ssidName = extractSsid()
-
+    private fun ScanResult.toWifiSource(cached: Boolean): WifiSource {
+        val band = WifiChannels.band(frequency)
         return WifiSource(
-            id = UUID.randomUUID().toString(),
-            name = ssidName,
-            bssid = BSSID,
-            rssi = level,
-            frequency = frequency,
-            band = band,
-            channel = channel,
-            channelWidth = channelWidth,
-            standard = standard,
-            security = security,
-            isConnected = BSSID == connectedBssid,
-            contributionPercent = 0 // Calculated later by EScoreCalculator
+            id = "wifi:${BSSID.lowercase(Locale.ROOT)}", name = extractSsid(), bssid = BSSID,
+            rssi = availableInt(level), frequency = frequency, band = band,
+            channel = WifiChannels.channel(frequency), channelWidth = extractChannelWidth(),
+            standard = extractWifiStandard(band), security = extractSecurity(),
+            isConnected = BSSID.equals(getConnectedBssid(), ignoreCase = true),
+            observation = Observation.fromBootTime(timestamp / 1000, SystemClock.elapsedRealtime(), Instant.now(), cached)
         )
     }
 
-    /**
-     * Get the BSSID of currently connected WiFi network.
-     * Uses modern NetworkCapabilities API on Android 12+, falls back to deprecated API.
-     */
     private fun getConnectedBssid(): String? {
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -352,20 +218,4 @@ class WifiScanner @Inject constructor(
         }
     }
 
-    /**
-     * Convert frequency (MHz) to WiFi channel number.
-     */
-    private fun frequencyToChannel(frequency: Int): Int {
-        return when {
-            // 2.4 GHz band
-            frequency in 2412..2484 -> (frequency - 2412) / 5 + 1
-            // 5 GHz band
-            frequency in 5170..5825 -> (frequency - 5170) / 5 + 34
-            // 6 GHz band (WiFi 6E)
-            frequency >= 5925 -> (frequency - 5925) / 5 + 1
-            else -> 0
-        }
-    }
 }
-
-class WifiScanException(message: String) : Exception(message)

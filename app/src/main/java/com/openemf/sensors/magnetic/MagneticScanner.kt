@@ -1,5 +1,7 @@
 package com.openemf.sensors.magnetic
 
+import java.util.concurrent.atomic.AtomicBoolean
+import android.os.SystemClock
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -10,6 +12,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -73,7 +76,10 @@ class MagneticScanner @Inject constructor(
      * Perform a magnetic field measurement.
      * Takes multiple samples over 2 seconds and returns statistics.
      */
-    suspend fun measure(): Result<MagneticReading> = suspendCancellableCoroutine { continuation ->
+    suspend fun measure(): Result<MagneticReading> = withTimeoutOrNull(3000) { measureSamples() }
+        ?: Result.failure(MagneticScanException("Magnetometer timed out"))
+
+    private suspend fun measureSamples(): Result<MagneticReading> = suspendCancellableCoroutine { continuation ->
         val sensor = magnetometer
         val manager = sensorManager
 
@@ -83,15 +89,16 @@ class MagneticScanner @Inject constructor(
         }
 
         val samples = mutableListOf<FloatArray>()
-        val startTime = System.currentTimeMillis()
+        val startTime = SystemClock.elapsedRealtime()
+        val completed = AtomicBoolean(false)
 
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
+                if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD && !completed.get()) {
                     samples.add(event.values.copyOf())
 
                     // Check if we've collected enough samples
-                    if (System.currentTimeMillis() - startTime >= SAMPLE_DURATION_MS) {
+                    if (SystemClock.elapsedRealtime() - startTime >= SAMPLE_DURATION_MS && completed.compareAndSet(false, true)) {
                         manager.unregisterListener(this)
 
                         if (samples.isEmpty()) {
@@ -115,12 +122,13 @@ class MagneticScanner @Inject constructor(
             SAMPLE_RATE_US
         )
 
-        if (!registered) {
+        if (!registered && completed.compareAndSet(false, true)) {
             continuation.resume(Result.failure(MagneticScanException("Failed to register sensor listener")))
             return@suspendCancellableCoroutine
         }
 
         continuation.invokeOnCancellation {
+            completed.set(true)
             manager.unregisterListener(listener)
         }
     }
@@ -170,7 +178,9 @@ class MagneticScanner @Inject constructor(
     /**
      * Get a quick single reading (instant, no averaging).
      */
-    suspend fun getInstantReading(): MagneticReading? = suspendCancellableCoroutine { continuation ->
+    suspend fun getInstantReading(): MagneticReading? = withTimeoutOrNull(2000) { awaitInstantReading() }
+
+    private suspend fun awaitInstantReading(): MagneticReading? = suspendCancellableCoroutine { continuation ->
         val sensor = magnetometer
         val manager = sensorManager
 
@@ -179,9 +189,10 @@ class MagneticScanner @Inject constructor(
             return@suspendCancellableCoroutine
         }
 
+        val completed = AtomicBoolean(false)
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
-                if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
+                if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD && completed.compareAndSet(false, true)) {
                     manager.unregisterListener(this)
 
                     val x = event.values[0].toDouble()
@@ -210,9 +221,11 @@ class MagneticScanner @Inject constructor(
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
 
-        manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        val registered = manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        if (!registered && completed.compareAndSet(false, true)) continuation.resume(null)
 
         continuation.invokeOnCancellation {
+            completed.set(true)
             manager.unregisterListener(listener)
         }
     }

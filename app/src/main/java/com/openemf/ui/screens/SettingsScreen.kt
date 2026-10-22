@@ -90,13 +90,18 @@ fun SettingsScreen(
                     )
                 }
 
-                // Nearby WiFi devices permission only required on Android 13+
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                PermissionItem(
+                    permission = Permission.READ_PHONE_STATE,
+                    label = "Phone State",
+                    description = "Required for cellular information updates",
+                    isGranted = Permission.READ_PHONE_STATE in permissionStatus.granted
+                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     PermissionItem(
-                        permission = Permission.NEARBY_WIFI_DEVICES,
-                        label = "Nearby WiFi Devices",
-                        description = "Required for WiFi network scanning",
-                        isGranted = Permission.NEARBY_WIFI_DEVICES in permissionStatus.granted
+                        permission = Permission.BLUETOOTH_CONNECT,
+                        label = "Bluetooth Device Information",
+                        description = "Required for device names and paired inventory",
+                        isGranted = Permission.BLUETOOTH_CONNECT in permissionStatus.granted
                     )
                 }
 
@@ -128,11 +133,11 @@ fun SettingsScreen(
             HorizontalDivider()
 
             // Monitoring section
-            SettingsSection(title = "Background Monitoring") {
+            SettingsSection(title = "Live Refresh") {
                 SettingsToggle(
                     icon = Icons.Default.Notifications,
-                    title = "Enable Monitoring",
-                    subtitle = "Continuously measure EMF levels in the background",
+                    title = "Refresh While App Is Open",
+                    subtitle = "Refresh measurements while this app is visible",
                     checked = monitoringEnabled,
                     onCheckedChange = onMonitoringToggle
                 )

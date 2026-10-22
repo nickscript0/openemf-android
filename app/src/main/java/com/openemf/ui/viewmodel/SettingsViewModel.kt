@@ -35,16 +35,14 @@ class SettingsViewModel @Inject constructor(
     val exportState: StateFlow<ExportState> = _exportState.asStateFlow()
 
     /** Permission status */
-    private val _permissionStatus = MutableStateFlow(sensorModule.checkPermissions())
-    val permissionStatus: StateFlow<PermissionStatus> = _permissionStatus.asStateFlow()
+    val permissionStatus: StateFlow<PermissionStatus> = sensorModule.permissionStatus
 
     /** Theme mode from preferences */
     val themeMode: StateFlow<ThemeMode> = preferencesRepository.themeMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
-    /** Background monitoring enabled state */
-    val monitoringEnabled: StateFlow<Boolean> = preferencesRepository.monitoringEnabled
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    /** Actual live-refresh state; a persisted toggle must not imply an active recorder. */
+    val monitoringEnabled: StateFlow<Boolean> = sensorModule.monitoringActive
 
     /** Monitoring interval in milliseconds */
     val monitoringInterval: StateFlow<Long> = preferencesRepository.monitoringInterval
@@ -58,7 +56,7 @@ class SettingsViewModel @Inject constructor(
      * Refresh permission status after returning from system settings.
      */
     fun refreshPermissions() {
-        _permissionStatus.value = sensorModule.checkPermissions()
+        sensorModule.checkPermissions()
     }
 
     /**

@@ -44,8 +44,7 @@ class DashboardViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     /** Permission status */
-    private val _permissionStatus = MutableStateFlow(sensorModule.checkPermissions())
-    val permissionStatus: StateFlow<PermissionStatus> = _permissionStatus.asStateFlow()
+    val permissionStatus: StateFlow<PermissionStatus> = sensorModule.permissionStatus
 
     init {
         // Collect measurements from the sensor module
@@ -74,7 +73,7 @@ class DashboardViewModel @Inject constructor(
      * Refresh permission status.
      */
     fun refreshPermissions() {
-        _permissionStatus.value = sensorModule.checkPermissions()
+        sensorModule.checkPermissions()
     }
 
     /**

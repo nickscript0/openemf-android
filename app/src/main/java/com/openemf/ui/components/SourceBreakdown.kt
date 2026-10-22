@@ -298,7 +298,7 @@ private fun InlineSourceItem(
 
             // Exposure index with color
             Text(
-                text = "${source.exposureIndex}",
+                text = source.rssi?.let { "$it dBm" } ?: "Unavailable",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = indexColor
@@ -402,7 +402,7 @@ private fun SourceItemRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "${source.exposureIndex}",
+                    text = source.rssi?.let { "$it dBm" } ?: "Unavailable",
                     style = MaterialTheme.typography.titleMedium,
                     color = indexColor
                 )
@@ -467,9 +467,9 @@ private fun SourceItemRow(
 data class SourceItem(
     val name: String?,
     val subtitle: String?,
-    val rssi: Int,
+    val rssi: Int?,
     val contributionPercent: Int,
-    val exposureIndex: Int = 0,  // Per-source exposure index (0-100)
+    val exposureIndex: Int? = null,  // Per-source exposure index (0-100)
     // Extended details for Phase 3 (optional)
     val details: Map<String, String> = emptyMap()
 )
@@ -478,7 +478,8 @@ data class SourceItem(
  * Calculate per-source exposure index using ElectroSmart formula.
  * Same formula as aggregate score, applied to individual RSSI.
  */
-fun calculateExposureIndex(rssiDbm: Int): Int {
+fun calculateExposureIndex(rssiDbm: Int?): Int? {
+    if (rssiDbm == null) return null
     return when {
         rssiDbm < -140 -> 0
         rssiDbm > 10 -> 100
@@ -489,4 +490,4 @@ fun calculateExposureIndex(rssiDbm: Int): Int {
 /**
  * Get color for exposure index (uses 6-level thresholds).
  */
-fun getExposureIndexColor(index: Int): Color = getEScoreColor(index)
+fun getExposureIndexColor(index: Int?): Color = index?.let { getEScoreColor(it) } ?: Color.Gray

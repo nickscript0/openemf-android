@@ -14,7 +14,9 @@ data class Measurement(
     val cellularSources: List<CellularSource>,
     val magneticField: MagneticFieldReading?,
     val context: MeasurementContext,
-    val confidence: ConfidenceFlags
+    val confidence: ConfidenceFlags,
+    val acquisition: Map<Modality, AcquisitionReport> = emptyMap(),
+    val pairedBluetoothDevices: List<PairedBluetoothDevice> = emptyList()
 ) {
     val totalSources: Int
         get() = wifiSources.size + bluetoothSources.size + cellularSources.size
@@ -93,7 +95,8 @@ enum class SourceType {
 interface Source {
     val id: String
     val name: String?
-    val rssi: Int
+    val rssi: Int?
+    val observation: Observation
     val type: SourceType
     val contributionPercent: Int
 }
@@ -102,7 +105,7 @@ data class WifiSource(
     override val id: String,
     override val name: String?,              // SSID (may be null on Android 10+)
     val bssid: String,
-    override val rssi: Int,
+    override val rssi: Int?,
     val frequency: Int,                      // MHz
     val band: WifiBand,
     val channel: Int,
@@ -110,7 +113,8 @@ data class WifiSource(
     val standard: WifiStandard = WifiStandard.UNKNOWN,
     val security: WifiSecurity = WifiSecurity.UNKNOWN,
     val isConnected: Boolean = false,
-    override val contributionPercent: Int = 0
+    override val contributionPercent: Int = 0,
+    override val observation: Observation = Observation()
 ) : Source {
     override val type = SourceType.WIFI
 }
@@ -156,10 +160,12 @@ data class BluetoothSource(
     override val id: String,
     override val name: String?,
     val address: String,
-    override val rssi: Int,
+    override val rssi: Int?,
     val deviceType: BluetoothDeviceType,
     val isConnected: Boolean = false,
-    override val contributionPercent: Int = 0
+    override val contributionPercent: Int = 0,
+    override val observation: Observation = Observation(),
+    val transport: BluetoothTransport = BluetoothTransport.UNKNOWN
 ) : Source {
     override val type = SourceType.BLUETOOTH
 }
@@ -179,14 +185,16 @@ enum class BluetoothDeviceType {
 data class CellularSource(
     override val id: String,
     override val name: String?,              // Carrier name
-    override val rssi: Int,                  // Generic signal strength (dBm)
+    override val rssi: Int?,                 // Platform dBm (LTE RSRP / NR SS-RSRP); null if unavailable
     val technology: CellularTechnology,
     val band: Int?,
-    val cellId: Int?,
+    val cellId: Long?,
     val isRegistered: Boolean = false,
     override val contributionPercent: Int = 0,
     // Detailed cell identity (Phase 3)
-    val details: CellularDetails? = null
+    val details: CellularDetails? = null,
+    override val observation: Observation = Observation(),
+    val subscriptionId: Int? = null
 ) : Source {
     override val type = SourceType.CELLULAR
 }
@@ -197,29 +205,43 @@ data class CellularSource(
  */
 data class CellularDetails(
     // Identity
-    val mcc: Int?,                    // Mobile Country Code (e.g., 404 = India)
-    val mnc: Int?,                    // Mobile Network Code (e.g., 49 = Airtel)
-    val tac: Int?,                    // Tracking Area Code (LTE) / LAC (3G)
-    val ci: Int?,                     // Cell Identity (28-bit for LTE)
-    val pci: Int?,                    // Physical Cell ID (0-503 for LTE)
-    val enb: Int?,                    // eNodeB ID (derived from CI)
-    val eci: Long?,                   // E-UTRAN Cell ID (full 28-bit)
+    val mcc: Int? = null,                    // Mobile Country Code (e.g., 404 = India)
+    val mnc: Int? = null,                    // Mobile Network Code (e.g., 49 = Airtel)
+    val tac: Int? = null,                    // Tracking Area Code (LTE) / LAC (3G)
+    val ci: Int? = null,                     // Cell Identity (28-bit for LTE)
+    val pci: Int? = null,                    // Physical Cell ID (0-503 for LTE)
+    val enb: Int? = null,                    // eNodeB ID (derived from CI)
+    val eci: Long? = null,                   // E-UTRAN Cell ID (full 28-bit)
     // Signal quality
-    val rsrp: Int?,                   // Reference Signal Received Power (dBm)
-    val rsrq: Int?,                   // Reference Signal Received Quality (dB)
-    val rssnr: Int?,                  // Signal-to-Noise Ratio (dB)
-    val cqi: Int?,                    // Channel Quality Indicator (0-15)
-    val ta: Int?,                     // Timing Advance
+    val rsrp: Int? = null,                   // Reference Signal Received Power (dBm)
+    val rsrq: Int? = null,                   // Reference Signal Received Quality (dB)
+    val rssnr: Int? = null,                  // Raw RSSNR: tenths of dB before API 30, whole dB afterwards
+    val cqi: Int? = null,                    // Channel Quality Indicator (0-15)
+    val ta: Int? = null,                     // Timing Advance
     // Network info
-    val earfcn: Int?,                 // E-UTRA Absolute Radio Frequency Channel Number
-    val bandwidth: Int?,              // Channel bandwidth in MHz (e.g., 10, 15, 20)
-    val plmn: String?                 // PLMN ID (MCC + MNC, e.g., "40449")
+    val earfcn: Int? = null,                 // E-UTRA Absolute Radio Frequency Channel Number
+    val bandwidth: Int? = null,              // Channel bandwidth in MHz (e.g., 10, 15, 20)
+    val plmn: String? = null,                // Original strings preserve 2- vs 3-digit MNC
+    val nci: Long? = null,
+    val nrArfcn: Int? = null,
+    val bands: List<Int> = emptyList(),
+    val ssRsrp: Int? = null,
+    val ssRsrq: Int? = null,
+    val ssSinr: Int? = null,
+    val csiRsrp: Int? = null,
+    val csiRsrq: Int? = null,
+    val csiSinr: Int? = null,
+    val lac: Int? = null,
+    val arfcn: Int? = null,
+    val uarfcn: Int? = null,
+    val rssnrDb: Double? = null
 ) {
     /**
      * Human-readable PLMN (e.g., "404-49")
      */
     val formattedPlmn: String?
-        get() = if (mcc != null && mnc != null) "$mcc-$mnc" else plmn
+        get() = plmn?.takeIf { it.length in 5..6 }?.let { "${it.take(3)}-${it.drop(3)}" }
+            ?: if (mcc != null && mnc != null) "$mcc-$mnc" else plmn
 
     /**
      * Calculate eNodeB ID from ECI (ECI = eNB * 256 + CID)

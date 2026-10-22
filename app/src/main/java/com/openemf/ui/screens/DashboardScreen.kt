@@ -36,6 +36,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.openemf.sensors.api.*
+import android.os.SystemClock
+import kotlinx.coroutines.delay
 import com.openemf.sensors.scoring.EScoreCalculator
 import com.openemf.ui.components.*
 
@@ -57,6 +59,14 @@ fun DashboardScreen(
 ) {
     val scrollState = rememberScrollState()
     val isScanning = sensorState is SensorState.Scanning
+    val nowElapsedMs by produceState(SystemClock.elapsedRealtime()) {
+        while (true) { delay(1000); value = SystemClock.elapsedRealtime() }
+    }
+    val calculator = remember { EScoreCalculator() }
+    val currentScore = lastMeasurement?.let {
+        calculator.calculateFresh(it.wifiSources + it.bluetoothSources + it.cellularSources, nowElapsedMs)
+    }
+    val indexAvailable = (currentScore?.sourceCount ?: 0) > 0
 
     Scaffold(
         topBar = {
@@ -104,18 +114,18 @@ fun DashboardScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // E-Score display
-                val score = lastMeasurement?.eScore?.score ?: 0
-            val label = getScoreLabel(score)
+                val score = currentScore?.score ?: 0
+            val label = "Relative received-signal index"
 
             // Calculate intensities for wave visualization
             val wifiIntensity = lastMeasurement?.wifiSources?.let {
-                calculateAggregateIntensity(it.map { s -> s.rssi })
+                calculateAggregateIntensity(it.mapNotNull { s -> s.rssi })
             } ?: 0.3f
             val bluetoothIntensity = lastMeasurement?.bluetoothSources?.let {
-                calculateAggregateIntensity(it.map { s -> s.rssi })
+                calculateAggregateIntensity(it.mapNotNull { s -> s.rssi })
             } ?: 0.2f
             val cellularIntensity = lastMeasurement?.cellularSources?.let {
-                calculateAggregateIntensity(it.map { s -> s.rssi })
+                calculateAggregateIntensity(it.mapNotNull { s -> s.rssi })
             } ?: 0.4f
 
             // Show wave animation ONLY during scanning
@@ -147,7 +157,7 @@ fun DashboardScreen(
 
             // Show gauge when NOT scanning
             AnimatedVisibility(
-                visible = !isScanning,
+                visible = !isScanning && indexAvailable,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -158,6 +168,12 @@ fun DashboardScreen(
                     onLabelClick = onSolutionsClick
                 )
             }
+
+            if (!isScanning && lastMeasurement != null && !indexAvailable) {
+                Text("Relative index unavailable: no fresh measurable signals", style = MaterialTheme.typography.bodyLarge)
+            }
+            Text("Relative received signal, not a calibrated exposure or safety measurement.",
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
             // State message (errors, throttling, etc.)
             StateMessage(state = sensorState)
@@ -173,7 +189,7 @@ fun DashboardScreen(
 
             // Source contributions with expandable details
             lastMeasurement?.let { measurement ->
-                val breakdown = measurement.eScore.breakdown
+                val breakdown = currentScore?.breakdown.orEmpty()
                 var showDetails by remember { mutableStateOf(false) }
 
                 // Contribution summary card with toggle
@@ -252,10 +268,10 @@ fun DashboardScreen(
                                             .map { source ->
                                                 SourceItem(
                                                     name = source.name ?: source.bssid,
-                                                    subtitle = "${source.frequency} MHz • Ch ${source.channel}",
+                                                    subtitle = "${source.frequency} MHz • Ch ${source.channel.takeIf { it != 0 } ?: "Unknown"} • ${observationText(source.observation, nowElapsedMs)}",
                                                     rssi = source.rssi,
                                                     contributionPercent = source.contributionPercent,
-                                                    exposureIndex = calculateExposureIndex(source.rssi),
+                                                    exposureIndex = calculateExposureIndex(source.rssi.takeIf { source.observation.freshness(nowElapsedMs) == Freshness.FRESH }),
                                                     details = buildWifiDetails(source)
                                                 )
                                             }
@@ -273,10 +289,10 @@ fun DashboardScreen(
                                             .map { source ->
                                                 SourceItem(
                                                     name = source.name ?: "Unknown Device",
-                                                    subtitle = source.deviceType.name.lowercase().replace("_", " "),
+                                                    subtitle = "${source.transport} • ${observationText(source.observation, nowElapsedMs)}",
                                                     rssi = source.rssi,
                                                     contributionPercent = source.contributionPercent,
-                                                    exposureIndex = calculateExposureIndex(source.rssi),
+                                                    exposureIndex = calculateExposureIndex(source.rssi.takeIf { source.observation.freshness(nowElapsedMs) == Freshness.FRESH }),
                                                     details = buildBluetoothDetails(source)
                                                 )
                                             }
@@ -294,10 +310,10 @@ fun DashboardScreen(
                                             .map { source ->
                                                 SourceItem(
                                                     name = source.name ?: "Unknown Carrier",
-                                                    subtitle = source.technology.name.replace("_", " "),
+                                                    subtitle = "${source.technology.displayName} • ${observationText(source.observation, nowElapsedMs)}",
                                                     rssi = source.rssi,
                                                     contributionPercent = source.contributionPercent,
-                                                    exposureIndex = calculateExposureIndex(source.rssi),
+                                                    exposureIndex = calculateExposureIndex(source.rssi.takeIf { source.observation.freshness(nowElapsedMs) == Freshness.FRESH }),
                                                     details = buildCellularDetails(source)
                                                 )
                                             }
@@ -314,7 +330,7 @@ fun DashboardScreen(
                 }
 
                 // Confidence indicator
-                ConfidenceCard(confidence = measurement.confidence)
+                AcquisitionCard(measurement, nowElapsedMs)
             }
 
             // Empty state
@@ -529,12 +545,12 @@ private fun getScoreLabel(score: Int): String = when {
  * Shows BSSID, signal, band, channel width, standard, and security.
  */
 private fun buildWifiDetails(source: WifiSource): Map<String, String> {
-    val details = mutableMapOf<String, String>()
+    val details = observationDetails(source.observation).toMutableMap()
 
     details["BSSID"] = source.bssid
-    details["Signal"] = "${source.rssi} dBm"
+    details["Signal"] = source.rssi?.let { "$it dBm" } ?: "Unavailable"
     details["Band"] = source.band.displayName
-    details["Channel"] = "${source.channel}"
+    details["Channel"] = source.channel.takeIf { it != 0 }?.toString() ?: "Unknown"
 
     if (source.channelWidth != WifiChannelWidth.UNKNOWN) {
         details["Width"] = source.channelWidth.displayName
@@ -557,10 +573,12 @@ private fun buildWifiDetails(source: WifiSource): Map<String, String> {
  * Shows address, signal, device type, and connection status.
  */
 private fun buildBluetoothDetails(source: BluetoothSource): Map<String, String> {
-    val details = mutableMapOf<String, String>()
+    val details = observationDetails(source.observation).toMutableMap()
 
     details["Address"] = source.address
-    details["Signal"] = "${source.rssi} dBm"
+    details["Transport"] = source.transport.name
+    details["Connection"] = "Unknown (discovery only)"
+    details["Signal"] = source.rssi?.let { "$it dBm" } ?: "Unavailable"
     details["Type"] = source.deviceType.name.lowercase()
         .replace("_", " ")
         .replaceFirstChar { it.uppercase() }
@@ -577,10 +595,12 @@ private fun buildBluetoothDetails(source: BluetoothSource): Map<String, String> 
  * Shows technology, band, and detailed LTE/5G info when available.
  */
 private fun buildCellularDetails(source: CellularSource): Map<String, String> {
-    val details = mutableMapOf<String, String>()
+    val details = observationDetails(source.observation).toMutableMap()
 
-    details["Signal"] = "${source.rssi} dBm"
+    details["Signal"] = source.rssi?.let { "$it dBm" } ?: "Unavailable"
     details["Technology"] = source.technology.displayName
+    source.cellId?.let { details["Cell identity"] = it.toString() }
+    source.subscriptionId?.let { details["Subscription"] = it.toString() }
     source.band?.let { details["Band"] = it.toString() }
 
     if (source.isRegistered) {
@@ -599,10 +619,26 @@ private fun buildCellularDetails(source: CellularSource): Map<String, String> {
         d.localCellId?.let { details["CID"] = it.toString() }
         d.pci?.let { details["PCI"] = it.toString() }
 
+        d.nci?.let { details["NCI (36 bit)"] = it.toString() }
+        d.nrArfcn?.let { details["NR-ARFCN"] = it.toString() }
+        if (d.bands.isNotEmpty()) details["Reported bands"] = d.bands.joinToString()
+        d.lac?.let { details["LAC"] = it.toString() }
+        d.arfcn?.let { details["ARFCN"] = it.toString() }
+        d.uarfcn?.let { details["UARFCN"] = it.toString() }
+        if (source.technology == CellularTechnology.NR_5G) {
+            details["SS-RSRP"] = d.ssRsrp?.let { "$it dBm" } ?: "Unavailable"
+            details["SS-RSRQ"] = d.ssRsrq?.let { "$it dB" } ?: "Unavailable"
+            details["SS-SINR"] = d.ssSinr?.let { "$it dB" } ?: "Unavailable"
+            details["CSI-RSRP"] = d.csiRsrp?.let { "$it dBm" } ?: "Unavailable"
+            details["CSI-RSRQ"] = d.csiRsrq?.let { "$it dB" } ?: "Unavailable"
+            details["CSI-SINR"] = d.csiSinr?.let { "$it dB" } ?: "Unavailable"
+        }
+
         // Signal quality
         d.rsrp?.let { details["RSRP"] = "$it dBm" }
         d.rsrq?.let { details["RSRQ"] = "$it dB" }
-        d.rssnr?.let { details["RSSNR"] = "$it dB" }
+        d.rssnrDb?.let { details["RSSNR"] = "$it dB" }
+        d.rssnr?.let { details["RSSNR (raw Android value)"] = it.toString() }
         d.cqi?.let { details["CQI"] = it.toString() }
         d.ta?.let { details["Timing Adv"] = it.toString() }
 
@@ -658,7 +694,7 @@ private fun ContributionBar(
         }
         // Percentage and count
         Text(
-            text = if (percentage == 0 && count > 0) "<1%" else "$percentage%",
+            text = "$percentage%",
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.width(32.dp)
         )

@@ -131,6 +131,13 @@ or phone compatibility as verified without actually exercising them.
   failures and subsequent test-only repairs are recorded in
   [BASELINE.md](BASELINE.md). All 87 tests now pass; APK signature and unchanged
   binary hash verified. Existing lint findings: 2 errors, 65 warnings, 1 hint.
-- No acquisition, storage, recording, UI, or toolchain changes have started.
+- Acquisition correctness is implemented and host-validated. See
+  [ACQUISITION.md](ACQUISITION.md): 123 tests pass; lint has no errors, 67 warnings,
+  and one hint. Background service recording and durable per-source storage are
+  still later milestones.
+- The user explicitly prefers current stable tools/dependencies over maintaining
+  outdated tooling. Toolchain modernization is brought forward as a separate
+  change after the validated acquisition checkpoint. Kotlin/Compose/Hilt/Room
+  remain the application stack.
 - The user explicitly deferred device testing. Installed Pixel Android version
   and device validation remain pending; no APK has been installed or run.
