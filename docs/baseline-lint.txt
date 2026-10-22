@@ -1,0 +1,447 @@
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/ui/components/AddPlaceDialog.kt:69: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+                    text = "Location: ${String.format("%.4f", latitude)}, ${String.format("%.4f", longitude)}",
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/ui/components/AddPlaceDialog.kt:69: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+                    text = "Location: ${String.format("%.4f", latitude)}, ${String.format("%.4f", longitude)}",
+                                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/cellular/CellularScanner.kt:280: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            String.format("%03d%02d", mcc, mnc)
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/ui/screens/DashboardScreen.kt:481: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+                        text = String.format("%.1f µT", magnetic.magnitudeUt),
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/ui/screens/DashboardScreen.kt:486: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+                        text = String.format("%.1f mG", magnetic.magnitudeMg),
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/ui/screens/DashboardScreen.kt:499: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+                            text = String.format("~%.1f µT AC", magnetic.estimatedAcComponentUt),
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/scoring/EScoreCalculator.kt:210: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            mw >= 1.0 -> String.format("%.1f mW", mw)
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/scoring/EScoreCalculator.kt:211: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            mw >= 0.001 -> String.format("%.1f µW", mw * 1000)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/scoring/EScoreCalculator.kt:212: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            mw >= 0.000001 -> String.format("%.1f nW", mw * 1_000_000)
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/scoring/EScoreCalculator.kt:213: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            mw >= 0.000000001 -> String.format("%.1f pW", mw * 1_000_000_000)
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/scoring/EScoreCalculator.kt:214: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            else -> String.format("%.1f fW", mw * 1_000_000_000_000)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/guidelines/RegulatoryGuidelines.kt:301: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            rfPercentOfLimit < 1 -> String.format("%.2f%%", rfPercentOfLimit)
+                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/guidelines/RegulatoryGuidelines.kt:302: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            rfPercentOfLimit < 10 -> String.format("%.1f%%", rfPercentOfLimit)
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/guidelines/RegulatoryGuidelines.kt:303: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            else -> String.format("%.0f%%", rfPercentOfLimit)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/guidelines/RegulatoryGuidelines.kt:313: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            elfPercentOfLimit < 1 -> String.format("%.2f%%", elfPercentOfLimit)
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/guidelines/RegulatoryGuidelines.kt:314: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            elfPercentOfLimit < 10 -> String.format("%.1f%%", elfPercentOfLimit)
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/guidelines/RegulatoryGuidelines.kt:315: Warning: Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead [DefaultLocale]
+            else -> String.format("%.0f%%", elfPercentOfLimit)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "DefaultLocale":
+   Calling String#toLowerCase() or #toUpperCase() without specifying an
+   explicit locale is a common source of bugs. The reason for that is that
+   those methods will use the current locale on the user's device, and even
+   though the code appears to work correctly when you are developing the app,
+   it will fail in some locales. For example, in the Turkish locale, the
+   uppercase replacement for i is not I.
+
+   If you want the methods to just perform ASCII replacement, for example to
+   convert an enum name, call String#toUpperCase(Locale.ROOT) instead. If you
+   really want to use the current locale, call
+   String#toUpperCase(Locale.getDefault()) instead.
+
+   https://developer.android.com/reference/java/util/Locale.html#default_locale
+
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/cellular/CellularScanner.kt:252: Error: Call requires API level 28 (current min is 26): android.telephony.CellIdentityLte#getMccString [NewApi]
+        val mcc = identity.mccString?.toIntOrNull()
+                           ~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/cellular/CellularScanner.kt:253: Error: Call requires API level 28 (current min is 26): android.telephony.CellIdentityLte#getMncString [NewApi]
+        val mnc = identity.mncString?.toIntOrNull()
+                           ~~~~~~~~~
+
+   Explanation for issues of type "NewApi":
+   This check scans through all the Android API calls in the application and
+   warns about any calls that are not available on all versions targeted by
+   this application (according to its minimum SDK attribute in the manifest).
+
+   If you really want to use this API and don't need to support older devices
+   just set the minSdkVersion in your build.gradle or AndroidManifest.xml
+   files.
+
+   If your code is deliberately accessing newer APIs, and you have ensured
+   (e.g. with conditional execution) that this code will only ever be called
+   on a supported platform, then you can annotate your class or method with
+   the @TargetApi annotation specifying the local minimum SDK to apply, such
+   as @TargetApi(11), such that this check considers 11 rather than your
+   manifest file's minimum SDK as the required API level.
+
+   If you are deliberately setting android: attributes in style definitions,
+   make sure you place this in a values-vNN folder in order to avoid running
+   into runtime conflicts on certain devices where manufacturers have added
+   custom attributes whose ids conflict with the new ones on later platforms.
+
+   Similarly, you can use tools:targetApi="11" in an XML file to indicate that
+   the element will only be inflated in an adequate context.
+
+/Users/nsvarich/Documents/dev/openemf-android/app/build.gradle.kts:16: Warning: Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details. [OldTargetApi]
+        targetSdk = 35
+        ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "OldTargetApi":
+   When your application or sdk runs on a version of Android that is more
+   recent than your targetSdkVersion specifies that it has been tested with,
+   various compatibility modes kick in. This ensures that your application
+   continues to work, but it may look out of place. For example, if the
+   targetSdkVersion is less than 14, your app may get an option button in the
+   UI.
+
+   To fix this issue, set the targetSdkVersion to the highest available value.
+   Then test your app to make sure everything works correctly. You may want to
+   consult the compatibility notes to see what changes apply to each version
+   you are adding support for:
+   https://developer.android.com/reference/android/os/Build.VERSION_CODES.html
+   as well as follow this guide:
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.
+   html
+
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.html
+
+/Users/nsvarich/Documents/dev/openemf-android/gradle/wrapper/gradle-wrapper.properties:3: Warning: A newer version of Gradle than 8.13 is available: 8.14.6 [AndroidGradlePluginVersion]
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:2: Warning: A newer version of com.android.application than 8.13.2 is available: 9.4.1 [AndroidGradlePluginVersion]
+agp = "8.13.2"
+      ~~~~~~~~
+
+   Explanation for issues of type "AndroidGradlePluginVersion":
+   This detector looks for usage of the Android Gradle Plugin where the
+   version you are using is not the current stable release. Using older
+   versions is fine, and there are cases where you deliberately want to stick
+   with an older version. However, you may simply not be aware that a more
+   recent version is available, and that is what this lint check helps find.
+
+/Users/nsvarich/Documents/dev/openemf-android/app/build.gradle.kts:11: Warning: A newer version of compileSdkVersion than 35 is available: 36 [GradleDependency]
+    compileSdk = 35
+    ~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/build.gradle.kts:85: Warning: A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0 [GradleDependency]
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:4: Warning: A newer version of androidx.core:core-ktx than 1.15.0 is available: 1.19.1 [GradleDependency]
+coreKtx = "1.15.0"
+          ~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:5: Warning: A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.8.7 is available: 2.11.0 [GradleDependency]
+lifecycleRuntimeKtx = "2.8.7"
+                      ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:5: Warning: A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.8.7 is available: 2.11.0 [GradleDependency]
+lifecycleRuntimeKtx = "2.8.7"
+                      ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:6: Warning: A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.13.0 [GradleDependency]
+activityCompose = "1.9.3"
+                  ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:7: Warning: A newer version of androidx.compose:compose-bom than 2024.12.01 is available: 2026.09.00 [GradleDependency]
+composeBom = "2024.12.01"
+             ~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:9: Warning: A newer version of androidx.hilt:hilt-navigation-compose than 1.2.0 is available: 1.4.0 [GradleDependency]
+hiltNavigationCompose = "1.2.0"
+                        ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:10: Warning: A newer version of androidx.navigation:navigation-compose than 2.8.5 is available: 2.10.2 [GradleDependency]
+navigationCompose = "2.8.5"
+                    ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:11: Warning: A newer version of androidx.room:room-compiler than 2.6.1 is available: 2.8.5 [GradleDependency]
+room = "2.6.1"
+       ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:11: Warning: A newer version of androidx.room:room-ktx than 2.6.1 is available: 2.8.5 [GradleDependency]
+room = "2.6.1"
+       ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:11: Warning: A newer version of androidx.room:room-runtime than 2.6.1 is available: 2.8.5 [GradleDependency]
+room = "2.6.1"
+       ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:12: Warning: A newer version of androidx.datastore:datastore-preferences than 1.1.1 is available: 1.3.0 [GradleDependency]
+datastore = "1.1.1"
+            ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:14: Warning: A newer version of com.google.android.gms:play-services-location than 21.3.0 is available: 21.4.0 [GradleDependency]
+playServicesLocation = "21.3.0"
+                       ~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:3: Warning: A newer version of org.jetbrains.kotlin.android than 2.0.21 is available: 2.4.21 [NewerVersionAvailable]
+kotlin = "2.0.21"
+         ~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:3: Warning: A newer version of org.jetbrains.kotlin.plugin.compose than 2.0.21 is available: 2.4.21 [NewerVersionAvailable]
+kotlin = "2.0.21"
+         ~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:8: Warning: A newer version of com.google.dagger.hilt.android than 2.53.1 is available: 2.60.1 [NewerVersionAvailable]
+hilt = "2.53.1"
+       ~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:8: Warning: A newer version of com.google.dagger:hilt-android than 2.53.1 is available: 2.60.1 [NewerVersionAvailable]
+hilt = "2.53.1"
+       ~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:8: Warning: A newer version of com.google.dagger:hilt-compiler than 2.53.1 is available: 2.60.1 [NewerVersionAvailable]
+hilt = "2.53.1"
+       ~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:15: Warning: A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-play-services than 1.7.3 is available: 1.11.0 [NewerVersionAvailable]
+coroutinesPlayServices = "1.7.3"
+                         ~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/gradle/libs.versions.toml:16: Warning: A newer version of org.osmdroid:osmdroid-android than 6.1.18 is available: 6.1.20 [NewerVersionAvailable]
+osmdroid = "6.1.18"
+           ~~~~~~~~
+
+   Explanation for issues of type "NewerVersionAvailable":
+   This detector checks with a central repository to see if there are newer
+   versions available for the dependencies used by this project. This is
+   similar to the GradleDependency check, which checks for newer versions
+   available in the Android SDK tools and libraries, but this works with any
+   MavenCentral dependency, and connects to the library every time, which
+   makes it more flexible but also much slower.
+
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/ui/screens/SettingsScreen.kt:48: Warning: Modifier parameter should be the first optional parameter [ModifierParameter from androidx.compose.ui]
+    modifier: Modifier = Modifier
+    ~~~~~~~~
+
+   Explanation for issues of type "ModifierParameter":
+   The first (or only) Modifier parameter in a Composable function should
+   follow the following rules:
+   - Be named modifier
+   - Have a type of Modifier
+   - Either have no default value, or have a default value of Modifier
+   - If optional, be the first optional parameter in the parameter list
+
+   Vendor: Jetpack Compose
+   Identifier: androidx.compose.ui
+   Feedback: https://issuetracker.google.com/issues/new?component=612128
+
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/cellular/CellularScanner.kt:268: Warning: Unnecessary; SDK_INT is always >= 26 [ObsoleteSdkInt]
+        val rssnr = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/wifi/WifiScanner.kt:282: Warning: Unnecessary; SDK_INT is always >= 26 [ObsoleteSdkInt]
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/mipmap-anydpi-v26: Warning: This folder configuration (v26) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into mipmap-anydpi. [ObsoleteSdkInt]
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/ui/screens/MapScreen.kt:63: Hint: Prefer mutableIntStateOf instead of mutableStateOf [AutoboxingStateCreation from androidx.compose.runtime]
+    var requestMyLocation by remember { mutableStateOf(0) } // Increment to trigger location update
+                                        ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "AutoboxingStateCreation":
+   Calling mutableStateOf<T>() when T is either backed by a primitive type on
+   the JVM or is a value class results in a state implementation that requires
+   all state values to be boxed. This usually causes an additional allocation
+   for each state write, and adds some additional work to auto-unbox values
+   when reading the value of the state. Instead, prefer to use a specialized
+   primitive state implementation for Int, Long, Float, and Double when the
+   state does not need to track null values and does not override the default
+   SnapshotMutationPolicy. See mutableIntStateOf(), mutableLongStateOf(),
+   mutableFloatStateOf(), and mutableDoubleStateOf() for more information.
+
+   Vendor: Jetpack Compose
+   Identifier: androidx.compose.runtime
+   Feedback: https://issuetracker.google.com/issues/new?component=612128
+
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/values/ic_launcher_background.xml:3: Warning: The resource R.color.ic_launcher_background appears to be unused [UnusedResources]
+    <color name="ic_launcher_background">#1E1B4B</color>
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/values/strings.xml:4: Warning: The resource R.string.dashboard appears to be unused [UnusedResources]
+    <string name="dashboard">Dashboard</string>
+            ~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/values/strings.xml:5: Warning: The resource R.string.history appears to be unused [UnusedResources]
+    <string name="history">History</string>
+            ~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/values/strings.xml:6: Warning: The resource R.string.settings appears to be unused [UnusedResources]
+    <string name="settings">Settings</string>
+            ~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/values/strings.xml:7: Warning: The resource R.string.measure_now appears to be unused [UnusedResources]
+    <string name="measure_now">Measure Now</string>
+            ~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/values/strings.xml:8: Warning: The resource R.string.scanning appears to be unused [UnusedResources]
+    <string name="scanning">Scanning…</string>
+            ~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/values/strings.xml:9: Warning: The resource R.string.no_measurements appears to be unused [UnusedResources]
+    <string name="no_measurements">No measurements yet</string>
+            ~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/values/strings.xml:10: Warning: The resource R.string.tap_to_measure appears to be unused [UnusedResources]
+    <string name="tap_to_measure">Tap the button to measure your EMF exposure</string>
+            ~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedResources":
+   Unused resources make applications larger and slow down builds.
+
+
+   The unused resource check can ignore tests. If you want to include
+   resources that are only referenced from tests, consider packaging them in a
+   test source set instead.
+
+   You can include test sources in the unused resource check by setting the
+   system property lint.unused-resources.include-tests =true, and to exclude
+   them (usually for performance reasons), use
+   lint.unused-resources.exclude-tests =true.
+   ,
+
+   Available options:
+
+   **skip-libraries** (default is true):
+   Whether the unused resource check should skip reporting unused resources in libraries.
+
+   Many libraries will declare resources that are part of the library surface; other modules depending on the library will also reference the resources. To avoid reporting all these resources as unused (in the context of a library), the unused resource check normally skips reporting unused resources in libraries. Instead, run the unused resource check on the consuming app module (along with `checkDependencies=true`).
+
+   However, there are cases where you want to check that all the resources declared in a library are used; in that case, you can disable the skip option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UnusedResources">
+           <option name="skip-libraries" value="true" />
+       </issue>
+   </lint>
+   ```
+
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml:2: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/mipmap-hdpi/ic_launcher.xml:2: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/mipmap-mdpi/ic_launcher.xml:2: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/mipmap-xhdpi/ic_launcher.xml:2: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/mipmap-xxhdpi/ic_launcher.xml:2: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.xml:2: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+^
+
+   Explanation for issues of type "MonochromeLauncherIcon":
+   If android:roundIcon and android:icon are both in your manifest, you must
+   either remove the reference to android:roundIcon if it is not needed; or,
+   supply the monochrome icon in the drawable defined by the android:roundIcon
+   and android:icon attribute.
+
+   For example, if android:roundIcon and android:icon are both in the
+   manifest, a launcher might choose to use android:roundIcon over
+   android:icon to display the adaptive app icon. Therefore, your themed
+   application iconwill not show if your monochrome attribute is not also
+   specified in android:roundIcon.
+
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/res/drawable/ic_launcher_foreground.png: Warning: Found bitmap drawable res/drawable/ic_launcher_foreground.png in densityless folder [IconLocation]
+
+   Explanation for issues of type "IconLocation":
+   The res/drawable folder is intended for density-independent graphics such
+   as shapes defined in XML. For bitmaps, move it to drawable-mdpi and
+   consider providing higher and lower resolution versions in drawable-ldpi,
+   drawable-hdpi and drawable-xhdpi. If the icon really is density independent
+   (for example a solid color) you can place it in drawable-nodpi.
+
+   https://developer.android.com/guide/practices/screens_support.html
+
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/ui/navigation/AppNavigation.kt:109: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://openemf.invisiblerainbows.com"))
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/MainActivity.kt:104: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                                ~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/ui/screens/MapScreen.kt:363: Warning: Use the KTX extension function String.toColorInt instead? [UseKtx]
+        setColor(android.graphics.Color.parseColor("#6366F1")) // Indigo
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling
+
+   ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+/Users/nsvarich/Documents/dev/openemf-android/app/build.gradle.kts:84: Warning: Use version catalog instead [UseTomlInstead]
+    testImplementation("junit:junit:4.13.2")
+                       ~~~~~~~~~~~~~~~~~~~~
+/Users/nsvarich/Documents/dev/openemf-android/app/build.gradle.kts:85: Warning: Use version catalog instead [UseTomlInstead]
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseTomlInstead":
+   If your project is using a libs.versions.toml file, you should place all
+   Gradle dependencies in the TOML file. This lint check looks for version
+   declarations outside of the TOML file and suggests moving them (and in the
+   IDE, provides a quickfix to performing the operation automatically).
+
+2 errors, 65 warnings, 1 hint

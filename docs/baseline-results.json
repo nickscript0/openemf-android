@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-22",
+  "upstream_commit": "253731a021c27ec0df3b4c97e74096ce9d38b5b8",
+  "application_sources_changed": false,
+  "dependency_versions_changed": false,
+  "original_test_status": "Compilation failed; zero tests executed",
+  "test_harness_first_run": {
+    "tests": 87,
+    "failures": 3
+  },
+  "final_tests": {
+    "tests": 87,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "name": "com.openemf.sensors.EScoreCalculatorTest",
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ExposureIndexTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.RegulatoryGuidelinesTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanSchedulerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.SourceDetailsTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "lint": {
+    "status": "Pre-existing errors remain",
+    "counts": {
+      "Warning": 65,
+      "Error": 2,
+      "Hint": 1
+    },
+    "errors": [
+      {
+        "id": "NewApi",
+        "message": "Call requires API level 28 (current min is 26): `android.telephony.CellIdentityLte#getMccString`",
+        "locations": [
+          {
+            "file": "/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/cellular/CellularScanner.kt",
+            "line": "252",
+            "column": "28"
+          }
+        ]
+      },
+      {
+        "id": "NewApi",
+        "message": "Call requires API level 28 (current min is 26): `android.telephony.CellIdentityLte#getMncString`",
+        "locations": [
+          {
+            "file": "/Users/nsvarich/Documents/dev/openemf-android/app/src/main/java/com/openemf/sensors/cellular/CellularScanner.kt",
+            "line": "253",
+            "column": "28"
+          }
+        ]
+      }
+    ]
+  },
+  "apk": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "bytes": 24938937,
+    "sha256": "9aa61262bbeb6fad3e23711a7bb3ff68f18106a535377af7c03e25aae3a46f53",
+    "signature_verified": true
+  },
+  "device": {
+    "status": "Deferred by user",
+    "android_version": null,
+    "api_level": null,
+    "tests_performed": false
+  }
+}

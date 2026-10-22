@@ -108,7 +108,7 @@ class ScanSchedulerTest {
     }
 
     @Test
-    fun `interval increases 1.5x when budget is medium`() {
+    fun `interval increases by half when budget is medium`() {
         // Consume 2 scans, leaving 2
         repeat(2) { scheduler.consumeScan() }
 

@@ -127,9 +127,10 @@ or phone compatibility as verified without actually exercising them.
 - Plan and `AGENTS.md` pointer saved before repository creation.
 - Fork created and verified; requested remotes and local branch configured at
   the original reviewed upstream commit. ElectroSmart remains untouched.
-- Initial unchanged application compilation/package succeeded. The original
-  local tests fail to compile; exact errors are recorded in
-  [BASELINE.md](BASELINE.md). Baseline verification is ongoing.
+- Unchanged application compilation/package succeeded. Original test compilation
+  failures and subsequent test-only repairs are recorded in
+  [BASELINE.md](BASELINE.md). All 87 tests now pass; APK signature and unchanged
+  binary hash verified. Existing lint findings: 2 errors, 65 warnings, 1 hint.
 - No acquisition, storage, recording, UI, or toolchain changes have started.
-- No device is currently visible over ADB; installed Pixel Android version and
-  device validation remain pending.
+- The user explicitly deferred device testing. Installed Pixel Android version
+  and device validation remain pending; no APK has been installed or run.

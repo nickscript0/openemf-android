@@ -100,15 +100,22 @@ class EScoreCalculatorTest {
     @Test
     fun `score at 0 dBm is approximately 93`() {
         // score = floor(2 * (0 + 140) / 3) = floor(280/3) = 93
-        val sources = listOf(createWifiSource(0))
+        // Ten valid -10 dBm sources sum to 0 dBm. A single 0 dBm WiFi
+        // reading is outside the scanner's valid range and is filtered out.
+        val sources = List(10) { createWifiSource(-10, index = it) }
         val result = calculator.calculate(sources)
+        assertEquals(10, result.sourceCount)
+        assertEquals(0, result.cumulativeDbm)
         assertTrue("Score should be ~93, was ${result.score}", result.score in 92..95)
     }
 
     @Test
     fun `score at +10 dBm is 100`() {
-        val sources = listOf(createWifiSource(10))
+        // One hundred valid -10 dBm sources sum to +10 dBm.
+        val sources = List(100) { createWifiSource(-10, index = it) }
         val result = calculator.calculate(sources)
+        assertEquals(100, result.sourceCount)
+        assertEquals(10, result.cumulativeDbm)
         assertEquals(100, result.score)
     }
 
@@ -211,11 +218,12 @@ class EScoreCalculatorTest {
     @Test
     fun `equal power sources have equal breakdown`() {
         val sources = listOf(
-            createWifiSource(-40),
-            createCellularSource(-40),
+            createWifiSource(-50),
+            createCellularSource(-50), // Valid LTE range ends at -43 dBm.
         )
         val result = calculator.calculate(sources)
 
+        assertEquals(2, result.sourceCount)
         assertEquals(50, result.breakdown[SourceType.WIFI])
         assertEquals(50, result.breakdown[SourceType.CELLULAR])
     }
@@ -343,11 +351,11 @@ class EScoreCalculatorTest {
 
     // ==================== Helper Functions ====================
 
-    private fun createWifiSource(rssi: Int, name: String = "TestNetwork"): WifiSource {
+    private fun createWifiSource(rssi: Int, name: String = "TestNetwork", index: Int = 0): WifiSource {
         return WifiSource(
-            id = "wifi_$rssi",
+            id = "wifi_${rssi}_$index",
             name = name,
-            bssid = "00:11:22:33:44:55",
+            bssid = "00:11:22:33:44:${index.toString(16).padStart(2, '0')}",
             rssi = rssi,
             frequency = 2437,
             band = WifiBand.WIFI_2_4_GHZ,

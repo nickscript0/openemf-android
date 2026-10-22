@@ -2,6 +2,7 @@ package com.openemf.sensors
 
 import com.openemf.sensors.api.*
 import com.openemf.sensors.guidelines.RegulatoryGuidelines
+import com.openemf.sensors.scoring.EScoreCalculator
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -218,16 +219,12 @@ class RegulatoryGuidelinesTest {
     }
 
     private fun createMeasurementWithMagneticField(magneticUt: Double): Measurement {
+        val wifiSources = listOf(createWifiSource(-50))
         return Measurement(
             id = "test",
             timestamp = Instant.now(),
-            eScore = EScoreResult(
-                score = 30,
-                breakdown = mapOf(SourceType.WIFI to 100),
-                dominantSource = null,
-                totalExposureQuotient = 0.1
-            ),
-            wifiSources = listOf(createWifiSource(-50)),
+            eScore = EScoreCalculator().calculate(wifiSources),
+            wifiSources = wifiSources,
             bluetoothSources = emptyList(),
             cellularSources = emptyList(),
             magneticField = MagneticFieldReading(
@@ -246,18 +243,15 @@ class RegulatoryGuidelinesTest {
         wifiRssi: List<Int>,
         cellularRssi: List<Int>
     ): Measurement {
+        val wifiSources = wifiRssi.mapIndexed { i, rssi -> createWifiSource(rssi, i) }
+        val cellularSources = cellularRssi.mapIndexed { i, rssi -> createCellularSource(rssi, i) }
         return Measurement(
             id = "test",
             timestamp = Instant.now(),
-            eScore = EScoreResult(
-                score = 30,
-                breakdown = mapOf(SourceType.WIFI to 80, SourceType.CELLULAR to 20),
-                dominantSource = null,
-                totalExposureQuotient = 0.1
-            ),
-            wifiSources = wifiRssi.mapIndexed { i, rssi -> createWifiSource(rssi, i) },
+            eScore = EScoreCalculator().calculate(wifiSources + cellularSources),
+            wifiSources = wifiSources,
             bluetoothSources = emptyList(),
-            cellularSources = cellularRssi.mapIndexed { i, rssi -> createCellularSource(rssi, i) },
+            cellularSources = cellularSources,
             magneticField = null,
             context = MeasurementContext(),
             confidence = ConfidenceFlags(0.9f, 0.5f, 0.9f, 0.8f)
