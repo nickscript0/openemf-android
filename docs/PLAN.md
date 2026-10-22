@@ -5,7 +5,11 @@
 Build a modern open-source Android app for Wi-Fi, Bluetooth, and cellular signal
 detection, technical measurement, and durable history. The primary device is a
 Pixel 9 Pro XL running stock Android. **Read and record its installed Android
-version and API level before any device testing.**
+version and API level before any device testing.** The user reports Android 17
+(API 37) on 2026-10-22. Minimum supported Android is now 17; compile, target, and
+minimum SDK are API 37. Do not spend time supporting earlier Android releases.
+This user report sets the development scope; reading the phone's actual release,
+API level, and build remains a prerequisite for device testing.
 
 The app is primarily for home use, with live measurements and background
 recording that the user explicitly starts and stops. Technical signal readings
@@ -154,5 +158,7 @@ or phone compatibility as verified without actually exercising them.
 - Next implementation milestone: explicitly started foreground-service recording
   with notification controls, independent of the UI. Technical charts remain
   part of the following UI milestone.
-- The user explicitly deferred device testing. Installed Pixel Android version
-  and device validation remain pending; no APK has been installed or run.
+- The user reports Android 17 on the Pixel and explicitly excludes older Android
+  support. Minimum SDK is raised separately to API 37. Device testing remains
+  deferred; the phone's release/API/build have not been read through ADB, and no
+  APK has been installed or run.

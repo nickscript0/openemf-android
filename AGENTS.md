@@ -9,3 +9,7 @@ in the project documentation; do not imply unperformed device validation.
 
 Prefer current stable, compatible tools and dependencies. Keep toolchain upgrades
 as separate changes; the user explicitly prefers upgrades over old-version workarounds.
+
+Target the user's Pixel on Android 17 (minimum API 37). Do not add older-Android
+compatibility work. The OS version is user-reported; device testing remains
+deferred until the phone's actual release, API level, and build are read.
