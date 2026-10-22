@@ -139,5 +139,11 @@ or phone compatibility as verified without actually exercising them.
   outdated tooling. Toolchain modernization is brought forward as a separate
   change after the validated acquisition checkpoint. Kotlin/Compose/Hilt/Room
   remain the application stack.
+- The separate toolchain upgrade is host-validated with Android Studio JBR 25,
+  Gradle 9.8.2, AGP 9.4.1, Kotlin 2.4.21, and compile/target API 37. All 123 tests
+  pass; lint has zero errors, 43 warnings, and one hint. See
+  [TOOLCHAIN.md](TOOLCHAIN.md) for pinned dependencies and build evidence.
+- Next implementation milestone: durable individual observation histories,
+  explicit Room migration, storage-backed statistics, and raw CSV export.
 - The user explicitly deferred device testing. Installed Pixel Android version
   and device validation remain pending; no APK has been installed or run.

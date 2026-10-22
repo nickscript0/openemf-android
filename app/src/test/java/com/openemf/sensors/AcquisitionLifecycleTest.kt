@@ -55,7 +55,7 @@ class AcquisitionLifecycleTest {
         val job = launch {
             callbackScan<Int>(10000) { _, _ ->
                 ready.complete(Unit)
-                val cleanup: () -> Unit = { released.incrementAndGet(); Unit }
+                val cleanup: () -> Unit = { released.incrementAndGet() }
                 cleanup
             }
         }

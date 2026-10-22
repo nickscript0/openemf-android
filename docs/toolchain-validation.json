@@ -1,0 +1,119 @@
+{
+  "date": "2026-10-22",
+  "phase": "separate toolchain modernization after acquisition checkpoint ecdb6c1",
+  "tests": {
+    "tests": 123,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "name": "com.openemf.sensors.AcquisitionLifecycleTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.AcquisitionPolicyTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.EScoreCalculatorTest",
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ExposureIndexTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.PermissionPolicyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.RegulatoryGuidelinesTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanReservationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanSchedulerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.SourceDetailsTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.WifiChannelsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "lint": {
+    "Error": 0,
+    "Warning": 43,
+    "Hint": 1
+  },
+  "jdk": "Android Studio JBR 25.0.3+-15898627-b508.16",
+  "gradle": "9.8.2",
+  "agp": "9.4.1",
+  "kotlin": "2.4.21",
+  "ksp": "2.3.12",
+  "compileSdk": 37,
+  "targetSdk": 37,
+  "minSdk": 26,
+  "bytecode_target": 17,
+  "sdk_build_tools": "36.0.0",
+  "initial_full_build": {
+    "successful": true,
+    "duration_seconds": 169,
+    "tasks_executed": 60,
+    "log": "toolchain-upgrade-build.log"
+  },
+  "final_incremental_build": {
+    "successful": true,
+    "duration_seconds": 42,
+    "tasks_executed": 10,
+    "tasks_up_to_date": 49,
+    "log": "toolchain-build.log",
+    "test_task": "UP-TO-DATE; complete execution and counts preserved from first full build"
+  },
+  "apk_path": "app/build/outputs/apk/debug/app-debug.apk",
+  "apk_sha256": "c19fd45913dca2fa85717bfb376c42c7190997fcb2389674b56cd04dd69d4246",
+  "apk_size_bytes": 27686939,
+  "apk_v2_signature_verified": true,
+  "device_tests_performed": false,
+  "emulator_tests_performed": false,
+  "installed_pixel_android_version": null,
+  "database_migration_tests_performed": false
+}

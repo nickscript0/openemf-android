@@ -1,206 +1,69 @@
-# OpenEMF Android
+# OpenEMF: Pixel home signal monitor
 
-<p align="center">
-  <img src="logo.png" alt="OpenEMF Logo" width="400">
-</p>
+An open-source Android app for Wi-Fi, Bluetooth, and cellular signal detection
+and measurement. This fork develops a technical home-monitoring workflow for a
+Pixel 9 Pro XL, using Kotlin, Compose, Hilt, and Room.
 
-<p align="center">
-  <strong>Measure, Mitigate and Educate</strong>
-</p>
+Forked from [apmai/openemf-android](https://github.com/apmai/openemf-android).
+See [the agreed plan](docs/PLAN.md) and [baseline evidence](docs/BASELINE.md).
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Status-BETA-yellow" alt="Beta Status">
-  <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue" alt="License">
-  <img src="https://img.shields.io/badge/Android-8.0%2B-green" alt="Android 8.0+">
-</p>
+## Current capabilities
 
-> **Note:** OpenEMF is currently in **beta**. We're actively seeking early testers to help improve the app. Your feedback is invaluable!
+- Wi-Fi observations with BSSID, received power, frequency, corrected 2.4/5/6 GHz
+  channels, width, standard, and security information.
+- Bounded BLE and Classic Bluetooth discovery. Paired devices are separate
+  inventory; pairing does not produce an RSSI or imply a connection.
+- Default-subscription cellular observations, including full 36-bit 5G NCI and
+  reported NR SS/CSI power and quality metrics.
+- Per-radio acquisition status, explicit missing values, observation timestamps,
+  cached-data provenance, and freshness indicators.
+- A relative received-signal dashboard. Stale, unknown-age, and unavailable
+  measurements do not enter the current index. The index is not a calibrated
+  exposure or safety measurement.
+- Live refresh while the app is visible, respecting Android scan limits.
 
-An open-source EMF (electromagnetic field) monitoring app for Android. Measure WiFi, Bluetooth, Cellular, and Magnetic field exposure with a simple E-Score rating system.
+The existing Room summary history and summary export remain. Durable individual
+signal histories, raw CSV export, and explicitly started foreground-service
+recording are the next milestones. Maps, coordinate recording, cloud services,
+and store publishing are deferred.
 
-## Features
+## Build and checks
 
-- **E-Score Rating**: Relative 0-100 exposure index for comparing environments
-  - 0-10: Excellent (Very low exposure)
-  - 11-25: Good (Low exposure)
-  - 26-50: Moderate (Typical urban levels)
-  - 51-75: Elevated (Above average)
-  - 76-90: High (Consider reducing sources)
-  - 90+: Very High
+Use the Gradle wrapper and a compatible JDK. The development setup uses Android
+Studio's JBR 25, Gradle 9.8.2, AGP 9.4.1, and Android SDK API 37. The minimum
+Android API is 26. Set `JAVA_HOME` and `ANDROID_HOME` for your installation.
 
-> **Note**: The E-Score is NOT a percentage of ICNIRP safety limits. Typical indoor exposures are millions of times below ICNIRP limits. The E-Score compares your environment to typical real-world exposure levels, helping you identify stronger sources and compare locations.
-
-- **Source Detection**: Scans for WiFi networks, Bluetooth devices, and cellular towers
-
-- **Magnetic Field Reading**: Uses device magnetometer to measure ELF-EMF
-
-- **Statistics & History**: Track your exposure over time with charts and trends
-
-- **Solutions & Tips**: Personalized recommendations to reduce EMF exposure
-
-- **Web Integration**: Quick access to OpenEMF website for education and resources
-
-## Download & Install
-
-Get the latest APK from [Releases](https://github.com/apmai/openemf-android/releases/latest).
-
-### Installation Steps
-
-1. **Download** the `app-release.apk` file on your Android device
-2. **Enable installation** from unknown sources:
-   - Go to Settings → Security → Install unknown apps
-   - Enable for your browser or file manager
-3. **Open** the downloaded APK file
-4. **Tap Install** when prompted
-5. **Grant permissions** when the app launches:
-   - Location (required for WiFi/cellular scanning)
-   - Bluetooth (for device detection)
-
-### Testing Checklist
-
-After installing, verify these features work:
-- [ ] App launches without crash
-- [ ] E-Score gauge displays and animates
-- [ ] WiFi networks are detected (Sources tab)
-- [ ] Bluetooth devices are found
-- [ ] Web tab opens website in browser
-- [ ] Statistics show measurement history
-- [ ] Dark/light theme toggle works
-
-### Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| "App not installed" | Enable "Install unknown apps" in Settings |
-| No WiFi networks found | Grant Location permission, enable GPS |
-| No Bluetooth devices | Grant Bluetooth permission, enable Bluetooth |
-
-## FAQ
-
-**Q: Is OpenEMF free?**
-A: Yes, completely free and open source under BSD 3-Clause license.
-
-**Q: Does it work without internet?**
-A: Yes, all measurements are done locally on your device. Internet is only needed to download the app.
-
-**Q: Why does it need Location permission?**
-A: Android requires Location permission to scan WiFi networks and cellular towers. This is an Android security requirement, not our choice. Your location data stays on your device.
-
-**Q: Is my data sent anywhere?**
-A: No, all data stays on your device. We don't collect any personal information or measurements.
-
-**Q: Why are WiFi scans limited?**
-A: Android throttles WiFi scans to 4 per 2 minutes (since Android 9). This is a system limitation we cannot bypass.
-
-**Q: Can I use this to find hidden cameras?**
-A: OpenEMF detects WiFi and Bluetooth signals, which some hidden cameras emit. However, it's not specifically designed for this purpose.
-
-**Q: Why is my E-Score different in different rooms?**
-A: EMF levels vary based on proximity to routers, cell towers, and other devices. Moving away from sources reduces exposure.
-
-**Q: Is there an iOS version?**
-A: No, iOS restricts access to WiFi and cellular scanning APIs, making a comparable app impossible.
-
-**Q: How accurate are the measurements?**
-A: The app uses your phone's built-in sensors. While not as precise as professional equipment, it provides reliable relative measurements for comparing environments.
-
-**Q: What do the E-Score levels mean?**
-A:
-- 0-10: Excellent (very low exposure)
-- 11-25: Good (low exposure)
-- 26-50: Moderate (typical urban levels)
-- 51-75: Elevated (above average)
-- 76-90: High (consider reducing sources)
-- 90+: Very High
-
-## Building from Source
-
-### Requirements
-- Android Studio Hedgehog (2023.1.1) or newer
-- JDK 17+
-- Android SDK 34
-
-### Build Steps
-
-```bash
-# Clone the repository
-git clone https://github.com/apmai/openemf-android.git
-cd openemf-android
-
-# Build debug APK
-./gradlew assembleDebug
-
-# APK will be at: app/build/outputs/apk/debug/app-debug.apk
+```sh
+./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
 ```
 
-## Tech Stack
+The personal-install debug APK is generated at:
 
-- **Language**: Kotlin
-- **UI**: Jetpack Compose + Material 3
-- **Architecture**: MVVM with StateFlow
-- **DI**: Hilt
-- **Database**: Room
-- **Maps**: OSMDroid (OpenStreetMap)
-
-## Permissions
-
-The app requires the following permissions:
-- `ACCESS_FINE_LOCATION` - For WiFi/cellular scanning and map features
-- `ACCESS_COARSE_LOCATION` - Location-based features
-- `BLUETOOTH_SCAN` - Bluetooth device detection (Android 12+)
-- `BLUETOOTH_CONNECT` - Bluetooth connectivity info (Android 12+)
-
-## Algorithm
-
-The E-Score is calculated using a logarithmic scale based on cumulative signal strength:
-
-```
-score = log10(exposure * 1000 + 1) / log10(1001) * 100
+```text
+app/build/outputs/apk/debug/app-debug.apk
 ```
 
-This provides a normalized 0-100 score where lower is better.
+[Acquisition notes](docs/ACQUISITION.md) describe the implementation, test coverage,
+and remaining limits. [Toolchain notes](docs/TOOLCHAIN.md) record the separate
+upgrade and reproducible commands.
 
-## Features in Development
+## Device validation
 
-We're actively working on new features for upcoming releases:
+Device testing is currently deferred. The Pixel's installed Android release and
+API level must be read from the actual phone before installing or testing an APK.
+Build success and local tests do not establish hardware scan quality or reliable
+background recording.
 
-| Feature | Status | Target |
-|---------|--------|--------|
-| Export data (CSV) | Done | v1.0.0 |
-| Cloud sync & backup | In Progress | v1.1.0 |
-| Global EMF heatmap | Planned | v1.1.0 |
-| Export data (PDF) | Planned | v1.1.0 |
-| Real-time exposure alerts | Planned | v1.2.0 |
-| Widgets for home screen | Planned | v1.2.0 |
-| Wear OS companion app | Exploring | TBD |
-| Multiple location profiles | Planned | v1.2.0 |
+The app requests Android location permission for Wi-Fi/cellular scan APIs,
+phone-state permission for cellular updates, and Bluetooth scan/connect
+permissions on Android 12+. These permissions are evaluated per radio; denying
+one does not fabricate measurements or block independently authorized radios.
+Android Location services may also need to be enabled. Scans cannot bypass
+Android or hardware limits.
 
-**Want to see the future vision?** Check out our [interactive demo mockup](https://www.invisiblerainbows.com/openemf) to preview upcoming features and UI concepts.
+## License and reference
 
-## Beta Feedback
-
-We're actively looking for feedback from early testers! If you encounter any issues or have suggestions:
-
-1. **Report Bugs**: [Open an issue](https://github.com/apmai/openemf-android/issues/new?template=bug_report.md)
-2. **Request Features**: [Submit a feature request](https://github.com/apmai/openemf-android/issues/new?template=feature_request.md)
-3. **General Feedback**: [Start a discussion](https://github.com/apmai/openemf-android/discussions)
-
-Your feedback helps us improve OpenEMF for everyone!
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues and pull requests.
-
-## Related Projects
-
-- [Invisible Rainbows](https://invisiblerainbows.com) - EMF education and research
-- [OpenEMF Web](https://openemf.invisiblerainbows.com) - Web companion app
-
-## License
-
-BSD 3-Clause License - see [LICENSE](LICENSE) for details.
-
-## Acknowledgments
-
-- Inspired by [ElectroSmart](https://github.com/arnaudlegout/electrosmart)
-- Based on research from [ICNIRP](https://www.icnirp.org/) and [BioInitiative](https://bioinitiative.org/)
+[BSD 3-Clause](LICENSE). Retains OpenEMF attribution and existing acknowledgments
+of [ElectroSmart](https://github.com/arnaudlegout/electrosmart). The user's
+[ElectroSmart reference branch](https://github.com/nickscript0/electrosmart/tree/improved-device-names)
+was kept read-only; provenance is described in the acquisition notes.

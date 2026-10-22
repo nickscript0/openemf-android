@@ -67,7 +67,7 @@ class WifiScanner @Inject constructor(@ApplicationContext private val context: C
                     if (!started) complete(result(AcquisitionStatus.REFUSED,
                         "Android refused the scan (throttling or radio busy)", getCachedResults()))
                 } catch (e: Exception) { fail(e) }
-                val cleanup: () -> Unit = { runCatching { context.unregisterReceiver(receiver) }; Unit }
+                val cleanup: () -> Unit = { runCatching { context.unregisterReceiver(receiver) } }
                 cleanup
             } ?: result(AcquisitionStatus.TIMED_OUT, "Wi-Fi scan timed out after 12 seconds", getCachedResults())
         } catch (e: CancellationException) { throw e
