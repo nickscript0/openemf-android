@@ -22,9 +22,8 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             OpenEMFDatabase::class.java,
-            "openemf_database"
+            "openemf_signal_history"
         )
-            .fallbackToDestructiveMigration()
             .build()
     }
 
@@ -37,4 +36,7 @@ object DatabaseModule {
     fun providePlaceDao(database: OpenEMFDatabase): PlaceDao {
         return database.placeDao()
     }
+
+    @Provides
+    fun provideObservationDao(database: OpenEMFDatabase): ObservationDao = database.observationDao()
 }

@@ -70,7 +70,10 @@ connection state.
 - Store timestamped individual Wi-Fi, Bluetooth, and cellular observations in
   Room with durable source identities, technology-specific fields, freshness,
   and recording-session context.
-- Preserve existing local data through an explicit schema migration.
+- Assume fresh installations for all users, per the user's 2026-10-22 scope
+  change. Create the new history schema directly; no prototype-schema migration
+  or legacy-data import is required for this milestone. Future released schema
+  changes must be considered separately once users have stored data.
 - Query histories and statistics from durable storage, removing reliance on the
   last 100 in-memory measurements.
 - Export raw observations as correctly escaped CSV through Android's document
@@ -133,8 +136,8 @@ or phone compatibility as verified without actually exercising them.
   binary hash verified. Existing lint findings: 2 errors, 65 warnings, 1 hint.
 - Acquisition correctness is implemented and host-validated. See
   [ACQUISITION.md](ACQUISITION.md): 123 tests pass; lint has no errors, 67 warnings,
-  and one hint. Background service recording and durable per-source storage are
-  still later milestones.
+  and one hint. At that checkpoint, background service recording and durable
+  per-source storage were later milestones.
 - The user explicitly prefers current stable tools/dependencies over maintaining
   outdated tooling. Toolchain modernization is brought forward as a separate
   change after the validated acquisition checkpoint. Kotlin/Compose/Hilt/Room
@@ -143,7 +146,13 @@ or phone compatibility as verified without actually exercising them.
   Gradle 9.8.2, AGP 9.4.1, Kotlin 2.4.21, and compile/target API 37. All 123 tests
   pass; lint has zero errors, 43 warnings, and one hint. See
   [TOOLCHAIN.md](TOOLCHAIN.md) for pinned dependencies and build evidence.
-- Next implementation milestone: durable individual observation histories,
-  explicit Room migration, storage-backed statistics, and raw CSV export.
+- Durable individual observation histories, storage-backed statistics, and raw
+  CSV export are implemented and host-validated. See [HISTORY.md](HISTORY.md):
+  139 tests pass; lint has zero errors, 43 warnings, and one hint. The user
+  explicitly cancelled the prototype-schema migration and confirmed fresh
+  installations for all users; the new history database is created directly.
+- Next implementation milestone: explicitly started foreground-service recording
+  with notification controls, independent of the UI. Technical charts remain
+  part of the following UI milestone.
 - The user explicitly deferred device testing. Installed Pixel Android version
   and device validation remain pending; no APK has been installed or run.

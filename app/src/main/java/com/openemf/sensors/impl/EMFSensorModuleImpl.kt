@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.SystemClock
+import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.openemf.sensors.api.*
 import com.openemf.sensors.acquisition.acquireRadio
@@ -13,6 +14,7 @@ import com.openemf.sensors.magnetic.MagneticScanner
 import com.openemf.sensors.scheduling.ScanScheduler
 import com.openemf.sensors.scoring.EScoreCalculator
 import com.openemf.sensors.wifi.WifiScanner
+import com.openemf.data.repository.MeasurementRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -31,7 +33,8 @@ class EMFSensorModuleImpl @Inject constructor(
     private val cellularScanner: CellularScanner,
     private val magneticScanner: MagneticScanner,
     private val scheduler: ScanScheduler,
-    private val calculator: EScoreCalculator
+    private val calculator: EScoreCalculator,
+    private val repository: MeasurementRepository
 ) : EMFSensorModule {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val scanMutex = Mutex()
@@ -58,9 +61,9 @@ class EMFSensorModuleImpl @Inject constructor(
         }
     }
 
-    override suspend fun measureNow(): Result<Measurement> = measure(setOf(Modality.WIFI, Modality.BLUETOOTH, Modality.CELLULAR))
+    override suspend fun measureNow(): Result<Measurement> = measure(setOf(Modality.WIFI, Modality.BLUETOOTH, Modality.CELLULAR), CaptureMode.MANUAL)
 
-    private suspend fun measure(modalities: Set<Modality>): Result<Measurement> = scanMutex.withLock {
+    private suspend fun measure(modalities: Set<Modality>, mode: CaptureMode): Result<Measurement> = scanMutex.withLock {
         val permissions = checkPermissions()
         if (!measurementContext.value.isForeground) {
             return@withLock Result.failure(MeasurementException("Open the app to scan; background recording is a later milestone"))
@@ -107,8 +110,14 @@ class EMFSensorModuleImpl @Inject constructor(
                     magneticField = magneticReading, context = measurementContext.value,
                     confidence = ConfidenceFlags(wc, bc, cc, (wc + bc + cc) / 3),
                     acquisition = mapOf(Modality.WIFI to w.report, Modality.BLUETOOTH to b.report, Modality.CELLULAR to c.report),
-                    pairedBluetoothDevices = if (Modality.BLUETOOTH in modalities) bluetoothScanner.getPairedDevices() else emptyList())
+                    pairedBluetoothDevices = if (Modality.BLUETOOTH in modalities) bluetoothScanner.getPairedDevices() else emptyList(),
+                    capturedElapsedRealtimeMs = now, captureMode = mode,
+                    bootCount = runCatching { Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT) }.getOrNull())
             }
+            // Saving belongs to acquisition, not a UI collector. Complete only after the atomic save.
+            try { repository.saveMeasurement(measurement) }
+            catch (e: CancellationException) { throw e }
+            catch (e: Exception) { throw MeasurementException("Could not save measurement: ${e.message ?: "storage unavailable"}") }
             _measurements.emit(measurement)
             _scanBudget.value = scheduler.getCurrentBudget()
             _sensorState.value = SensorState.Complete(measurement, measurement.confidence, SystemClock.elapsedRealtime() - started)
@@ -128,7 +137,7 @@ class EMFSensorModuleImpl @Inject constructor(
         val job = scope.launch(start = CoroutineStart.LAZY) {
             while (isActive) {
                 if (measurementContext.value.isForeground) {
-                    measure(config.modalities)
+                    measure(config.modalities, CaptureMode.LIVE_REFRESH)
                     delay(config.intervalMs.coerceAtLeast(10_000))
                 } else delay(1000)
             }

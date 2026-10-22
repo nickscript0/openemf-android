@@ -31,13 +31,23 @@ class DashboardViewModel @Inject constructor(
     private val _lastMeasurement = MutableStateFlow<Measurement?>(null)
     val lastMeasurement: StateFlow<Measurement?> = _lastMeasurement.asStateFlow()
 
-    /** Measurement history (in-memory for now) */
-    private val _measurementHistory = MutableStateFlow<List<Measurement>>(emptyList())
-    val measurementHistory: StateFlow<List<Measurement>> = _measurementHistory.asStateFlow()
+    private val _historyError = MutableStateFlow<String?>(null)
+    val historyError = _historyError.asStateFlow()
 
-    /** Stored measurements from database (for map) */
-    val storedMeasurements: StateFlow<List<MeasurementEntity>> = repository.getAllMeasurements()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    /** Durable summaries are the only input to history and statistics. */
+    val measurementHistory: StateFlow<List<MeasurementEntity>> = repository.getAllMeasurements()
+        .catch { _historyError.value = it.message ?: "Could not read capture history"; emit(emptyList()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val sources = repository.getSources()
+        .catch { _historyError.value = it.message ?: "Could not read source history"; emit(emptyList()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun observations(id: String) = repository.getObservations(id)
+        .catch { _historyError.value = it.message ?: "Could not read observations"; emit(emptyList()) }
+    suspend fun acquisitions(id: String) = repository.getAcquisitions(id)
+    suspend fun sourceHistory(type: SourceType, sourceId: String, before: Long?) =
+        repository.getSourceHistory(type, sourceId, beforeRowId = before)
 
     /** Places with statistics */
     val places: StateFlow<List<PlaceWithStats>> = repository.getPlacesWithStats()
@@ -51,11 +61,6 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             sensorModule.measurements.collect { measurement ->
                 _lastMeasurement.value = measurement
-                _measurementHistory.update { history ->
-                    listOf(measurement) + history.take(99) // Keep last 100
-                }
-                // Also save to database
-                repository.saveMeasurement(measurement)
             }
         }
     }
@@ -83,20 +88,16 @@ class DashboardViewModel @Inject constructor(
         sensorModule.updateContext(context)
     }
 
-    /**
-     * Delete a measurement from history.
-     */
-    fun deleteMeasurement(measurement: Measurement) {
-        _measurementHistory.update { history ->
-            history.filter { it.id != measurement.id }
+    fun deleteMeasurement(id: String) {
+        viewModelScope.launch {
+            try {
+                repository.deleteMeasurement(id)
+                _historyError.value = null
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e
+            } catch (e: Exception) {
+                _historyError.value = e.message ?: "Could not delete capture"
+            }
         }
-    }
-
-    /**
-     * Clear all measurement history.
-     */
-    fun clearHistory() {
-        _measurementHistory.value = emptyList()
     }
 
     /**

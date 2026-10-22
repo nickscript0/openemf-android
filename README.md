@@ -22,10 +22,15 @@ See [the agreed plan](docs/PLAN.md) and [baseline evidence](docs/BASELINE.md).
   exposure or safety measurement.
 - Live refresh while the app is visible, respecting Android scan limits.
 
-The existing Room summary history and summary export remain. Durable individual
-signal histories, raw CSV export, and explicitly started foreground-service
-recording are the next milestones. Maps, coordinate recording, cloud services,
-and store publishing are deferred.
+Individual signal observations and capture summaries are stored in Room.
+History includes saved captures, acquisition status, and paged per-source
+timelines. Statistics read durable history. Settings exports raw signal CSV
+through Android's document picker. See [history notes](docs/HISTORY.md).
+
+This development version assumes fresh installations for all users, as agreed;
+it creates a new database directly and does not import the upstream prototype's
+database. Explicitly started foreground-service recording is the next milestone.
+Maps, coordinate recording, cloud services, and store publishing are deferred.
 
 ## Build and checks
 

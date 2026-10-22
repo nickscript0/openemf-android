@@ -2,8 +2,12 @@ package com.openemf.data.repository
 
 import com.openemf.data.database.*
 import com.openemf.sensors.api.*
+import androidx.room.withTransaction
+import com.openemf.data.export.RawObservationCsv
+import java.io.Writer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.ensureActive
 import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
@@ -11,12 +15,14 @@ import javax.inject.Singleton
 import kotlin.math.*
 
 /**
- * Repository for measurement data with location support.
+ * Atomic capture storage, durable observation histories, and local raw export.
  */
 @Singleton
 class MeasurementRepository @Inject constructor(
+    private val database: OpenEMFDatabase,
     private val measurementDao: MeasurementDao,
-    private val placeDao: PlaceDao
+    private val placeDao: PlaceDao,
+    private val observationDao: ObservationDao
 ) {
     // ==================== Measurements ====================
 
@@ -35,10 +41,20 @@ class MeasurementRepository @Inject constructor(
         } else null
 
         val entity = measurement.toEntity(latitude, longitude, accuracy, placeId)
-        measurementDao.insert(entity)
-
-        // Update place statistics if matched
-        placeId?.let { updatePlaceStats(it) }
+        database.withTransaction {
+            // SharedFlow replay or a repeated save must not duplicate or replace a capture.
+            if (measurementDao.insertCaptureSummary(entity) == -1L) return@withTransaction
+            observationDao.insertCapture(CaptureEntity(measurement.id, measurement.captureMode,
+                measurement.recordingSessionId, measurement.capturedElapsedRealtimeMs,
+                measurement.bootCount, measurement.context.isForeground, measurement.context.motionState))
+            observationDao.insertAcquisitions(listOf(Modality.WIFI, Modality.BLUETOOTH, Modality.CELLULAR).map { modality ->
+                val report = measurement.acquisition[modality] ?: AcquisitionReport(
+                    AcquisitionStatus.UNAVAILABLE, "Acquisition status not supplied")
+                RadioAcquisitionEntity(measurement.id, modality, report.status, report.detail)
+            })
+            observationDao.insertObservations(measurement.observationEntities())
+            placeId?.let { updatePlaceStats(it) }
+        }
     }
 
     /**
@@ -69,51 +85,70 @@ class MeasurementRepository @Inject constructor(
      * Get summary statistics.
      */
     suspend fun getStatistics(): MeasurementStats {
-        val recent = measurementDao.getRecent(100)
-        if (recent.isEmpty()) {
-            return MeasurementStats(0, 0, 0, 0, null, null)
+        return database.withTransaction {
+            val stats = measurementDao.statistics()
+            MeasurementStats(stats.totalCount, stats.averageScore?.toInt(), stats.minScore,
+                stats.maxScore, stats.mostRecentTimestamp, measurementDao.mostFrequentDominantType(), stats.scoredCount)
         }
-
-        val scores = recent.map { it.eScore }
-        return MeasurementStats(
-            totalCount = measurementDao.getTotalCount(),
-            averageScore = scores.average().toInt(),
-            minScore = scores.minOrNull() ?: 0,
-            maxScore = scores.maxOrNull() ?: 0,
-            mostRecentTimestamp = recent.firstOrNull()?.timestamp,
-            dominantSourceType = recent
-                .mapNotNull { it.dominantSourceType }
-                .groupingBy { it }
-                .eachCount()
-                .maxByOrNull { it.value }
-                ?.key
-        )
     }
 
     /**
      * Delete old measurements (data retention).
      */
     suspend fun deleteOlderThan(days: Int) {
+        require(days >= 0)
         val cutoff = Instant.now().minusSeconds(days * 24 * 60 * 60L)
-        measurementDao.deleteOlderThan(cutoff)
+        database.withTransaction {
+            measurementDao.deleteOlderThan(cutoff)
+            placeDao.getAll().forEach { updatePlaceStats(it.id) }
+        }
     }
 
     /**
      * Delete all measurements (clear history).
      */
     suspend fun deleteAllMeasurements() {
-        measurementDao.deleteAll()
-        // Reset all place statistics
-        placeDao.getAll().forEach { place ->
-            placeDao.updateStats(place.id, 0, 0, place.lastMeasuredAt)
+        database.withTransaction {
+            measurementDao.deleteAll() // Foreign keys also remove observations, captures, and statuses.
+            placeDao.getAll().forEach { place ->
+                placeDao.updateStats(place.id, 0, 0, null)
+            }
         }
     }
 
-    /**
-     * Get all measurements for export.
-     */
-    suspend fun getAllMeasurementsForExport(): List<MeasurementEntity> =
-        measurementDao.getRecent(Int.MAX_VALUE)
+    suspend fun deleteMeasurement(id: String) = database.withTransaction {
+        val placeId = measurementDao.getById(id)?.placeId
+        measurementDao.deleteById(id)
+        placeId?.let { updatePlaceStats(it) }
+    }
+
+    fun getSources(): Flow<List<SourceHistorySummary>> = observationDao.sources()
+
+    fun getObservations(measurementId: String) = observationDao.forMeasurement(measurementId)
+    suspend fun getAcquisitions(measurementId: String) = observationDao.getAcquisitions(measurementId)
+
+    suspend fun getSourceHistory(type: SourceType, sourceId: String, limit: Int = 100, beforeRowId: Long? = null): List<ObservationRecord> {
+        require(limit in 1..1000)
+        return observationDao.sourceHistory(type, sourceId, limit, beforeRowId)
+    }
+
+    /** A single read transaction provides a consistent snapshot across bounded export pages. */
+    suspend fun exportRawObservations(writer: Writer): Long = database.withTransaction {
+        RawObservationCsv.writeHeader(writer)
+        val through = observationDao.maxRowId()
+        var after = 0L
+        var count = 0L
+        while (true) {
+            kotlinx.coroutines.currentCoroutineContext().ensureActive()
+            val rows = observationDao.exportPage(after, through, 500)
+            if (rows.isEmpty()) break
+            rows.forEach { RawObservationCsv.writeRecord(writer, it) }
+            count += rows.size
+            after = rows.last().observation.rowId
+        }
+        writer.flush()
+        count
+    }
 
     // ==================== Places ====================
 
@@ -246,7 +281,8 @@ class MeasurementRepository @Inject constructor(
             placeId = placeId,
             dominantSourceName = eScore.dominantSource?.name,
             dominantSourceType = eScore.dominantSource?.type?.name,
-            dominantSourcePercent = eScore.dominantSource?.contributionPercent
+            dominantSourcePercent = eScore.dominantSource?.contributionPercent,
+            indexAvailable = eScore.sourceCount > 0
         )
     }
 }
@@ -256,11 +292,12 @@ class MeasurementRepository @Inject constructor(
  */
 data class MeasurementStats(
     val totalCount: Int,
-    val averageScore: Int,
-    val minScore: Int,
-    val maxScore: Int,
+    val averageScore: Int?,
+    val minScore: Int?,
+    val maxScore: Int?,
     val mostRecentTimestamp: Instant?,
-    val dominantSourceType: String?
+    val dominantSourceType: String?,
+    val scoredCount: Int
 )
 
 /**

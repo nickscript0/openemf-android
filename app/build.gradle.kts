@@ -36,6 +36,28 @@ android {
     }
 
     // AGP built-in Kotlin inherits the Java 17 bytecode target above.
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            // Robolectric's documented access requirements on Java 17+.
+            it.jvmArgs(
+                "--enable-native-access=ALL-UNNAMED",
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-opens=java.base/java.util=ALL-UNNAMED",
+                "--add-opens=java.base/java.io=ALL-UNNAMED",
+                "--add-opens=java.base/java.net=ALL-UNNAMED",
+                "--add-opens=java.base/java.security=ALL-UNNAMED",
+                "--add-opens=java.base/java.text=ALL-UNNAMED",
+                "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
+                "--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
+                "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"
+            )
+        }
+    }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -79,6 +101,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.robolectric)
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     debugImplementation(libs.androidx.ui.tooling)
 }

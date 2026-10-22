@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-22",
+  "phase": "durable observations and raw CSV, fresh installations only",
+  "previous_checkpoint": "a6e3dfcb792624bf00e45ac229bb4cf9fb129dba",
+  "scope_change": "User cancelled prototype-schema migration and assumed first installation for all users.",
+  "database_name": "openemf_signal_history",
+  "schema_version": 1,
+  "schema_identity": "907747708214bb8fedfc453d999cd64b",
+  "schema_sha256": "1c293ac08cd844e2211284cf388f52dab98be06bd5460f266c94e41a123ccb5a",
+  "schema_file": "app/schemas/com.openemf.data.database.OpenEMFDatabase/1.json",
+  "migration_implemented": false,
+  "legacy_import_implemented": false,
+  "tests": {
+    "tests": 139,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "name": "com.openemf.data.HistoryStorageTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.data.RawObservationCsvTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.AcquisitionLifecycleTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.AcquisitionPolicyTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.EScoreCalculatorTest",
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ExposureIndexTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.PermissionPolicyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.RegulatoryGuidelinesTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanReservationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanSchedulerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.SourceDetailsTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.WifiChannelsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "new_history_tests": 16,
+  "robolectric": "4.17",
+  "host_sqlite_test_api": 35,
+  "lint": {
+    "Error": 0,
+    "Warning": 43,
+    "Hint": 1
+  },
+  "build": {
+    "successful": true,
+    "duration_seconds": 93,
+    "tasks_executed": 63,
+    "log": "history-build.log"
+  },
+  "jdk": "Android Studio JBR 25.0.3",
+  "gradle": "9.8.2",
+  "agp": "9.4.1",
+  "kotlin": "2.4.21",
+  "compileSdk": 37,
+  "targetSdk": 37,
+  "minSdk": 26,
+  "raw_csv_columns": 68,
+  "export_page_size": 500,
+  "source_history_page_size": 100,
+  "apk_path": "app/build/outputs/apk/debug/app-debug.apk",
+  "apk_sha256": "79edd0945a687b754c1b0a2bb438b415826060847da11d28f2780c03f206c8c3",
+  "apk_size_bytes": 27785243,
+  "apk_v2_signature_verified": true,
+  "physical_device_tests_performed": false,
+  "emulator_tests_performed": false,
+  "installed_pixel_android_version": null,
+  "document_picker_ui_tested": false,
+  "background_recording_implemented": false
+}

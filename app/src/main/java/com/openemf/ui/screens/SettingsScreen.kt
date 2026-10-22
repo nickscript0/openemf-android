@@ -192,12 +192,12 @@ fun SettingsScreen(
             SettingsSection(title = "Data") {
                 SettingsItem(
                     icon = Icons.Default.FileDownload,
-                    title = "Export to CSV",
+                    title = "Export raw signal CSV",
                     subtitle = when (exportState) {
                         is ExportState.Loading -> "Exporting..."
-                        is ExportState.Success -> "Exported ${exportState.count} measurements"
+                        is ExportState.Success -> "Exported ${exportState.count} signal observations"
                         is ExportState.Error -> exportState.message
-                        else -> "Save measurements to a file"
+                        else -> "Choose a file for all raw signal observations"
                     },
                     onClick = onExportCSV
                 )

@@ -1,0 +1,699 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "907747708214bb8fedfc453d999cd64b",
+    "entities": [
+      {
+        "tableName": "measurements",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `eScore` INTEGER NOT NULL, `exposureLevel` TEXT NOT NULL, `cumulativeDbm` INTEGER NOT NULL, `wifiCount` INTEGER NOT NULL, `bluetoothCount` INTEGER NOT NULL, `cellularCount` INTEGER NOT NULL, `wifiPercent` INTEGER NOT NULL, `bluetoothPercent` INTEGER NOT NULL, `cellularPercent` INTEGER NOT NULL, `latitude` REAL, `longitude` REAL, `accuracy` REAL, `placeId` TEXT, `dominantSourceName` TEXT, `dominantSourceType` TEXT, `dominantSourcePercent` INTEGER, `indexAvailable` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eScore",
+            "columnName": "eScore",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exposureLevel",
+            "columnName": "exposureLevel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cumulativeDbm",
+            "columnName": "cumulativeDbm",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wifiCount",
+            "columnName": "wifiCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bluetoothCount",
+            "columnName": "bluetoothCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cellularCount",
+            "columnName": "cellularCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wifiPercent",
+            "columnName": "wifiPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bluetoothPercent",
+            "columnName": "bluetoothPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cellularPercent",
+            "columnName": "cellularPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "accuracy",
+            "columnName": "accuracy",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "placeId",
+            "columnName": "placeId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dominantSourceName",
+            "columnName": "dominantSourceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dominantSourceType",
+            "columnName": "dominantSourceType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dominantSourcePercent",
+            "columnName": "dominantSourcePercent",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "indexAvailable",
+            "columnName": "indexAvailable",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_measurements_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_measurements_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          }
+        ]
+      },
+      {
+        "tableName": "places",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `icon` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `radiusMeters` REAL NOT NULL, `createdAt` INTEGER NOT NULL, `measurementCount` INTEGER NOT NULL, `averageScore` INTEGER NOT NULL, `lastMeasuredAt` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "icon",
+            "columnName": "icon",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "radiusMeters",
+            "columnName": "radiusMeters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "measurementCount",
+            "columnName": "measurementCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "averageScore",
+            "columnName": "averageScore",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastMeasuredAt",
+            "columnName": "lastMeasuredAt",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "captures",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`measurementId` TEXT NOT NULL, `mode` TEXT NOT NULL, `sessionId` TEXT, `elapsedRealtimeMs` INTEGER, `bootCount` INTEGER, `isForeground` INTEGER NOT NULL, `motionState` TEXT NOT NULL, PRIMARY KEY(`measurementId`), FOREIGN KEY(`measurementId`) REFERENCES `measurements`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "measurementId",
+            "columnName": "measurementId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mode",
+            "columnName": "mode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "elapsedRealtimeMs",
+            "columnName": "elapsedRealtimeMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "bootCount",
+            "columnName": "bootCount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "isForeground",
+            "columnName": "isForeground",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "motionState",
+            "columnName": "motionState",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "measurementId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_captures_sessionId",
+            "unique": false,
+            "columnNames": [
+              "sessionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_captures_sessionId` ON `${TABLE_NAME}` (`sessionId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "measurements",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "measurementId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "radio_acquisitions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`measurementId` TEXT NOT NULL, `modality` TEXT NOT NULL, `status` TEXT NOT NULL, `detail` TEXT, PRIMARY KEY(`measurementId`, `modality`), FOREIGN KEY(`measurementId`) REFERENCES `measurements`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "measurementId",
+            "columnName": "measurementId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modality",
+            "columnName": "modality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "detail",
+            "columnName": "detail",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "measurementId",
+            "modality"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "measurements",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "measurementId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "signal_observations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rowId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `measurementId` TEXT NOT NULL, `sourceId` TEXT NOT NULL, `sourceType` TEXT NOT NULL, `name` TEXT, `signalDbm` INTEGER, `signalMetric` TEXT NOT NULL, `observedAt` INTEGER, `observedElapsedRealtimeMs` INTEGER, `ageAtCaptureMs` INTEGER, `freshnessAtCapture` TEXT NOT NULL, `freshForMs` INTEGER NOT NULL, `timeBasis` TEXT NOT NULL, `cached` INTEGER NOT NULL, `wifi_bssid` TEXT, `wifi_frequencyMhz` INTEGER, `wifi_band` TEXT, `wifi_channel` INTEGER, `wifi_channelWidth` TEXT, `wifi_standard` TEXT, `wifi_security` TEXT, `wifi_connected` INTEGER, `bluetooth_address` TEXT, `bluetooth_deviceType` TEXT, `bluetooth_transport` TEXT, `bluetooth_connected` INTEGER, `cellular_technology` TEXT, `cellular_subscriptionId` INTEGER, `cellular_band` INTEGER, `cellular_cellId` INTEGER, `cellular_registered` INTEGER, `cellular_details_mcc` INTEGER, `cellular_details_mnc` INTEGER, `cellular_details_tac` INTEGER, `cellular_details_ci` INTEGER, `cellular_details_pci` INTEGER, `cellular_details_enb` INTEGER, `cellular_details_eci` INTEGER, `cellular_details_rsrp` INTEGER, `cellular_details_rsrq` INTEGER, `cellular_details_rssnr` INTEGER, `cellular_details_cqi` INTEGER, `cellular_details_ta` INTEGER, `cellular_details_earfcn` INTEGER, `cellular_details_bandwidth` INTEGER, `cellular_details_plmn` TEXT, `cellular_details_nci` INTEGER, `cellular_details_nrArfcn` INTEGER, `cellular_details_bands` TEXT, `cellular_details_ssRsrp` INTEGER, `cellular_details_ssRsrq` INTEGER, `cellular_details_ssSinr` INTEGER, `cellular_details_csiRsrp` INTEGER, `cellular_details_csiRsrq` INTEGER, `cellular_details_csiSinr` INTEGER, `cellular_details_lac` INTEGER, `cellular_details_arfcn` INTEGER, `cellular_details_uarfcn` INTEGER, `cellular_details_rssnrDb` REAL, FOREIGN KEY(`measurementId`) REFERENCES `measurements`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "rowId",
+            "columnName": "rowId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "measurementId",
+            "columnName": "measurementId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceId",
+            "columnName": "sourceId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceType",
+            "columnName": "sourceType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "signalDbm",
+            "columnName": "signalDbm",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "signalMetric",
+            "columnName": "signalMetric",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observedAt",
+            "columnName": "observedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "observedElapsedRealtimeMs",
+            "columnName": "observedElapsedRealtimeMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ageAtCaptureMs",
+            "columnName": "ageAtCaptureMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "freshnessAtCapture",
+            "columnName": "freshnessAtCapture",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "freshForMs",
+            "columnName": "freshForMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeBasis",
+            "columnName": "timeBasis",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cached",
+            "columnName": "cached",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wifi.bssid",
+            "columnName": "wifi_bssid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "wifi.frequencyMhz",
+            "columnName": "wifi_frequencyMhz",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "wifi.band",
+            "columnName": "wifi_band",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "wifi.channel",
+            "columnName": "wifi_channel",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "wifi.channelWidth",
+            "columnName": "wifi_channelWidth",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "wifi.standard",
+            "columnName": "wifi_standard",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "wifi.security",
+            "columnName": "wifi_security",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "wifi.connected",
+            "columnName": "wifi_connected",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "bluetooth.address",
+            "columnName": "bluetooth_address",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bluetooth.deviceType",
+            "columnName": "bluetooth_deviceType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bluetooth.transport",
+            "columnName": "bluetooth_transport",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bluetooth.connected",
+            "columnName": "bluetooth_connected",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.technology",
+            "columnName": "cellular_technology",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cellular.subscriptionId",
+            "columnName": "cellular_subscriptionId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.band",
+            "columnName": "cellular_band",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.cellId",
+            "columnName": "cellular_cellId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.registered",
+            "columnName": "cellular_registered",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.mcc",
+            "columnName": "cellular_details_mcc",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.mnc",
+            "columnName": "cellular_details_mnc",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.tac",
+            "columnName": "cellular_details_tac",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.ci",
+            "columnName": "cellular_details_ci",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.pci",
+            "columnName": "cellular_details_pci",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.enb",
+            "columnName": "cellular_details_enb",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.eci",
+            "columnName": "cellular_details_eci",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.rsrp",
+            "columnName": "cellular_details_rsrp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.rsrq",
+            "columnName": "cellular_details_rsrq",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.rssnr",
+            "columnName": "cellular_details_rssnr",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.cqi",
+            "columnName": "cellular_details_cqi",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.ta",
+            "columnName": "cellular_details_ta",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.earfcn",
+            "columnName": "cellular_details_earfcn",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.bandwidth",
+            "columnName": "cellular_details_bandwidth",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.plmn",
+            "columnName": "cellular_details_plmn",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cellular.details.nci",
+            "columnName": "cellular_details_nci",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.nrArfcn",
+            "columnName": "cellular_details_nrArfcn",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.bands",
+            "columnName": "cellular_details_bands",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cellular.details.ssRsrp",
+            "columnName": "cellular_details_ssRsrp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.ssRsrq",
+            "columnName": "cellular_details_ssRsrq",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.ssSinr",
+            "columnName": "cellular_details_ssSinr",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.csiRsrp",
+            "columnName": "cellular_details_csiRsrp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.csiRsrq",
+            "columnName": "cellular_details_csiRsrq",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.csiSinr",
+            "columnName": "cellular_details_csiSinr",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.lac",
+            "columnName": "cellular_details_lac",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.arfcn",
+            "columnName": "cellular_details_arfcn",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.uarfcn",
+            "columnName": "cellular_details_uarfcn",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cellular.details.rssnrDb",
+            "columnName": "cellular_details_rssnrDb",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "rowId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_signal_observations_measurementId",
+            "unique": false,
+            "columnNames": [
+              "measurementId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_signal_observations_measurementId` ON `${TABLE_NAME}` (`measurementId`)"
+          },
+          {
+            "name": "index_signal_observations_measurementId_sourceType_sourceId",
+            "unique": true,
+            "columnNames": [
+              "measurementId",
+              "sourceType",
+              "sourceId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_signal_observations_measurementId_sourceType_sourceId` ON `${TABLE_NAME}` (`measurementId`, `sourceType`, `sourceId`)"
+          },
+          {
+            "name": "index_signal_observations_sourceType_sourceId",
+            "unique": false,
+            "columnNames": [
+              "sourceType",
+              "sourceId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_signal_observations_sourceType_sourceId` ON `${TABLE_NAME}` (`sourceType`, `sourceId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "measurements",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "measurementId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '907747708214bb8fedfc453d999cd64b')"
+    ]
+  }
+}

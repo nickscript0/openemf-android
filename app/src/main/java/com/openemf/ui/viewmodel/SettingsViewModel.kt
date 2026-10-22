@@ -1,9 +1,9 @@
 package com.openemf.ui.viewmodel
 
-import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.openemf.data.database.MeasurementEntity
+import com.openemf.data.export.RawCsvExporter
 import com.openemf.data.preferences.PreferencesRepository
 import com.openemf.data.repository.MeasurementRepository
 import com.openemf.sensors.api.*
@@ -11,9 +11,6 @@ import com.openemf.ui.theme.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.File
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 /**
@@ -23,7 +20,8 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val sensorModule: EMFSensorModule,
     private val preferencesRepository: PreferencesRepository,
-    private val measurementRepository: MeasurementRepository
+    private val measurementRepository: MeasurementRepository,
+    private val rawCsvExporter: RawCsvExporter
 ) : ViewModel() {
 
     /** State for clear history operation */
@@ -134,27 +132,16 @@ class SettingsViewModel @Inject constructor(
         _clearHistoryState.value = OperationState.Idle
     }
 
-    /**
-     * Export measurements to CSV file.
-     */
-    fun exportToCSV(context: Context) {
+    /** The destination comes from Android's CreateDocument picker. */
+    fun exportToCSV(destination: Uri) {
+        if (_exportState.value is ExportState.Loading) return
         viewModelScope.launch {
             _exportState.value = ExportState.Loading
             try {
-                val measurements = measurementRepository.getAllMeasurementsForExport()
-                if (measurements.isEmpty()) {
-                    _exportState.value = ExportState.Error("No measurements to export")
-                    return@launch
-                }
-
-                val csvContent = buildCSV(measurements)
-                val fileName = "openemf_export_${System.currentTimeMillis()}.csv"
-                val file = File(context.getExternalFilesDir(null), fileName)
-                file.writeText(csvContent)
-
-                _exportState.value = ExportState.Success(file.absolutePath, measurements.size)
+                _exportState.value = ExportState.Success(rawCsvExporter.export(destination))
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e
             } catch (e: Exception) {
-                _exportState.value = ExportState.Error(e.message ?: "Failed to export")
+                _exportState.value = ExportState.Error("Export failed; the selected file may be incomplete. ${e.message ?: ""}")
             }
         }
     }
@@ -166,39 +153,7 @@ class SettingsViewModel @Inject constructor(
         _exportState.value = ExportState.Idle
     }
 
-    private fun buildCSV(measurements: List<MeasurementEntity>): String {
-        val sb = StringBuilder()
-        // Header
-        sb.appendLine("ID,Timestamp,E-Score,Exposure Level,WiFi Count,Bluetooth Count,Cellular Count,WiFi %,Bluetooth %,Cellular %,Latitude,Longitude,Accuracy,Place ID,Dominant Source,Dominant Type,Dominant %")
 
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-            .withZone(ZoneId.systemDefault())
-
-        // Data rows
-        measurements.forEach { m ->
-            sb.appendLine(listOf(
-                m.id,
-                formatter.format(m.timestamp),
-                m.eScore,
-                m.exposureLevel,
-                m.wifiCount,
-                m.bluetoothCount,
-                m.cellularCount,
-                m.wifiPercent,
-                m.bluetoothPercent,
-                m.cellularPercent,
-                m.latitude ?: "",
-                m.longitude ?: "",
-                m.accuracy ?: "",
-                m.placeId ?: "",
-                m.dominantSourceName ?: "",
-                m.dominantSourceType ?: "",
-                m.dominantSourcePercent ?: ""
-            ).joinToString(","))
-        }
-
-        return sb.toString()
-    }
 }
 
 /**
@@ -217,6 +172,6 @@ sealed class OperationState {
 sealed class ExportState {
     data object Idle : ExportState()
     data object Loading : ExportState()
-    data class Success(val filePath: String, val count: Int) : ExportState()
+    data class Success(val count: Long) : ExportState()
     data class Error(val message: String) : ExportState()
 }

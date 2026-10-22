@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.openemf.sensors.api.*
+import com.openemf.data.database.MeasurementEntity
 import com.openemf.ui.theme.BluetoothColor
 import com.openemf.ui.theme.CellularColor
 import com.openemf.ui.theme.WiFiColor
@@ -50,8 +51,9 @@ enum class TimePeriod(val label: String, val days: Int) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
-    measurementHistory: List<Measurement>,
-    currentMeasurement: Measurement?,
+    measurementHistory: List<MeasurementEntity>,
+    historyError: String?,
+    onHistoryClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -61,9 +63,8 @@ fun StatisticsScreen(
     // Filter measurements based on selected period
     val now = Instant.now()
     val cutoff = now.minus(selectedPeriod.days.toLong(), ChronoUnit.DAYS)
-    val filteredMeasurements = remember(measurementHistory, currentMeasurement, selectedPeriod) {
-        val all = if (currentMeasurement != null) listOf(currentMeasurement) + measurementHistory else measurementHistory
-        all.filter { it.timestamp.isAfter(cutoff) }
+    val filteredMeasurements = remember(measurementHistory, selectedPeriod) {
+        measurementHistory.filter { it.timestamp.isAfter(cutoff) && it.indexAvailable == true }
     }
 
     // Group measurements by day for drill-down
@@ -78,6 +79,9 @@ fun StatisticsScreen(
             TopAppBar(
                 title = { Text("Statistics") },
                 actions = {
+                    IconButton(onClick = onHistoryClick) {
+                        Icon(Icons.Default.History, contentDescription = "Stored captures and signal histories")
+                    }
                     IconButton(onClick = onSettingsClick) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
@@ -91,6 +95,7 @@ fun StatisticsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            historyError?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp)) }
             // Time period tabs
             TimePeriodTabs(
                 selectedPeriod = selectedPeriod,
@@ -112,8 +117,8 @@ fun StatisticsScreen(
                     // Summary cards
                     item {
                         SummarySection(
-                            history = filteredMeasurements.drop(if (currentMeasurement != null) 1 else 0),
-                            current = currentMeasurement?.takeIf { it.timestamp.isAfter(cutoff) },
+                            history = filteredMeasurements.drop(1),
+                            current = filteredMeasurements.firstOrNull(),
                             periodLabel = selectedPeriod.label
                         )
                     }
@@ -131,8 +136,8 @@ fun StatisticsScreen(
                     // Source breakdown
                     item {
                         SourceTrendCard(
-                            history = filteredMeasurements.drop(if (currentMeasurement != null) 1 else 0),
-                            current = currentMeasurement?.takeIf { it.timestamp.isAfter(cutoff) }
+                            history = filteredMeasurements.drop(1),
+                            current = filteredMeasurements.firstOrNull()
                         )
                     }
 
@@ -172,7 +177,7 @@ private fun TimePeriodTabs(
     selectedPeriod: TimePeriod,
     onPeriodSelected: (TimePeriod) -> Unit
 ) {
-    TabRow(
+    PrimaryTabRow(
         selectedTabIndex = TimePeriod.entries.indexOf(selectedPeriod)
     ) {
         TimePeriod.entries.forEach { period ->
@@ -198,11 +203,11 @@ private fun TimePeriodTabs(
 @Composable
 private fun DayCard(
     date: LocalDate,
-    measurements: List<Measurement>,
+    measurements: List<MeasurementEntity>,
     isExpanded: Boolean,
     onToggle: () -> Unit
 ) {
-    val scores = measurements.map { it.eScore.score }
+    val scores = measurements.map { it.eScore }
     val avgScore = scores.average().toInt()
     val minScore = scores.minOrNull() ?: 0
     val maxScore = scores.maxOrNull() ?: 0
@@ -330,12 +335,12 @@ private fun DayCard(
 
 @Composable
 private fun SummarySection(
-    history: List<Measurement>,
-    current: Measurement?,
+    history: List<MeasurementEntity>,
+    current: MeasurementEntity?,
     periodLabel: String = ""
 ) {
     val allMeasurements = if (current != null) history + current else history
-    val scores = allMeasurements.map { it.eScore.score }
+    val scores = allMeasurements.map { it.eScore }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -343,14 +348,14 @@ private fun SummarySection(
     ) {
         // Current score
         SummaryCard(
-            title = "Current",
-            value = "${current?.eScore?.score ?: 0}",
-            subtitle = current?.eScore?.level?.name ?: "N/A",
-            color = when (current?.eScore?.level) {
-                ExposureLevel.LOW -> Color(0xFF22C55E)
-                ExposureLevel.MODERATE -> Color(0xFFF59E0B)
-                ExposureLevel.HIGH -> Color(0xFFEF4444)
-                null -> MaterialTheme.colorScheme.onSurfaceVariant
+            title = "Latest saved",
+            value = current?.eScore?.toString() ?: "—",
+            subtitle = current?.exposureLevel ?: "N/A",
+            color = when (current?.exposureLevel) {
+                "LOW" -> Color(0xFF22C55E)
+                "MODERATE" -> Color(0xFFF59E0B)
+                "HIGH" -> Color(0xFFEF4444)
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
             },
             modifier = Modifier.weight(1f)
         )
@@ -415,7 +420,7 @@ private fun SummaryCard(
 
 @Composable
 private fun TrendChartCard(
-    measurements: List<Measurement>,
+    measurements: List<MeasurementEntity>,
     periodLabel: String = ""
 ) {
     Card(
@@ -459,10 +464,10 @@ private fun TrendChartCard(
 
 @Composable
 private fun ExposureLineChart(
-    measurements: List<Measurement>,
+    measurements: List<MeasurementEntity>,
     modifier: Modifier = Modifier
 ) {
-    val scores = measurements.map { it.eScore.score.toFloat() }
+    val scores = measurements.map { it.eScore.toFloat() }
     val lineColor = MaterialTheme.colorScheme.primary
 
     // Zone colors with 6-level scale
@@ -604,24 +609,24 @@ private fun LegendItem(color: Color, label: String) {
 
 @Composable
 private fun SourceTrendCard(
-    history: List<Measurement>,
-    current: Measurement?
+    history: List<MeasurementEntity>,
+    current: MeasurementEntity?
 ) {
     val allMeasurements = if (current != null) history + current else history
 
     // Calculate average contribution by source
     val avgWifi = allMeasurements
-        .mapNotNull { it.eScore.breakdown[SourceType.WIFI] }
+        .map { it.wifiPercent }
         .takeIf { it.isNotEmpty() }
         ?.average()?.toInt() ?: 0
 
     val avgBluetooth = allMeasurements
-        .mapNotNull { it.eScore.breakdown[SourceType.BLUETOOTH] }
+        .map { it.bluetoothPercent }
         .takeIf { it.isNotEmpty() }
         ?.average()?.toInt() ?: 0
 
     val avgCellular = allMeasurements
-        .mapNotNull { it.eScore.breakdown[SourceType.CELLULAR] }
+        .map { it.cellularPercent }
         .takeIf { it.isNotEmpty() }
         ?.average()?.toInt() ?: 0
 
@@ -700,8 +705,8 @@ private fun SourceContributionBar(
 
 @Composable
 private fun RecentMeasurementsCard(
-    history: List<Measurement>,
-    current: Measurement?
+    history: List<MeasurementEntity>,
+    current: MeasurementEntity?
 ) {
     val allMeasurements = (if (current != null) listOf(current) + history else history)
         .take(10) // Show last 10
@@ -721,7 +726,7 @@ private fun RecentMeasurementsCard(
 
             if (allMeasurements.isEmpty()) {
                 Text(
-                    text = "No measurements yet",
+                    text = "No scored captures yet",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -739,14 +744,15 @@ private fun RecentMeasurementsCard(
 
 @Composable
 private fun MeasurementRow(
-    measurement: Measurement,
+    measurement: MeasurementEntity,
     isCurrent: Boolean,
     showDate: Boolean = true
 ) {
-    val scoreColor = when (measurement.eScore.level) {
-        ExposureLevel.LOW -> Color(0xFF22C55E)
-        ExposureLevel.MODERATE -> Color(0xFFF59E0B)
-        ExposureLevel.HIGH -> Color(0xFFEF4444)
+    val scoreColor = when (measurement.exposureLevel) {
+        "LOW" -> Color(0xFF22C55E)
+        "MODERATE" -> Color(0xFFF59E0B)
+        "HIGH" -> Color(0xFFEF4444)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     val timeFormat = if (showDate) "MMM d, HH:mm" else "HH:mm"
@@ -773,14 +779,14 @@ private fun MeasurementRow(
                 }
             }
             Text(
-                text = "${measurement.totalSources} sources",
+                text = "${measurement.wifiCount + measurement.bluetoothCount + measurement.cellularCount} sources",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
         Text(
-            text = "${measurement.eScore.score}",
+            text = "${measurement.eScore}",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = scoreColor
@@ -826,9 +832,9 @@ private fun EmptyStatisticsState(period: TimePeriod = TimePeriod.DAY) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = when (period) {
-                        TimePeriod.DAY -> "No measurements taken today. Tap 'Measure Now' to start tracking."
-                        TimePeriod.WEEK -> "No measurements in the past week. Take regular readings to see trends."
-                        TimePeriod.MONTH -> "No measurements in the past month. Start measuring to build your history."
+                        TimePeriod.DAY -> "No scored captures in the past day. Raw captures remain available in History."
+                        TimePeriod.WEEK -> "No scored captures in the past week. Take regular readings to see trends."
+                        TimePeriod.MONTH -> "No scored captures in the past month. Start measuring to build your history."
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

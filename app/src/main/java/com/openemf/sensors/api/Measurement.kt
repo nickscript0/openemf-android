@@ -16,11 +16,17 @@ data class Measurement(
     val context: MeasurementContext,
     val confidence: ConfidenceFlags,
     val acquisition: Map<Modality, AcquisitionReport> = emptyMap(),
-    val pairedBluetoothDevices: List<PairedBluetoothDevice> = emptyList()
+    val pairedBluetoothDevices: List<PairedBluetoothDevice> = emptyList(),
+    val capturedElapsedRealtimeMs: Long? = null,
+    val bootCount: Int? = null,
+    val captureMode: CaptureMode = CaptureMode.MANUAL,
+    val recordingSessionId: String? = null
 ) {
     val totalSources: Int
         get() = wifiSources.size + bluetoothSources.size + cellularSources.size
 }
+
+enum class CaptureMode { MANUAL, LIVE_REFRESH, RECORDING }
 
 /**
  * Magnetic field (ELF-EMF) reading from magnetometer.

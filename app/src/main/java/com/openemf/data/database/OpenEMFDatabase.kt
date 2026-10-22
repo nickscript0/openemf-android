@@ -6,20 +6,24 @@ import java.time.Instant
 
 /**
  * OpenEMF Room Database
- * Stores measurements with location data and user-defined places.
+ * Fresh-install signal history schema; raw observations and summaries are saved atomically.
  */
 @Database(
     entities = [
         MeasurementEntity::class,
-        PlaceEntity::class
+        PlaceEntity::class,
+        CaptureEntity::class,
+        RadioAcquisitionEntity::class,
+        SignalObservationEntity::class
     ],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class OpenEMFDatabase : RoomDatabase() {
     abstract fun measurementDao(): MeasurementDao
     abstract fun placeDao(): PlaceDao
+    abstract fun observationDao(): ObservationDao
 }
 
 // ==================== Entities ====================
@@ -27,7 +31,7 @@ abstract class OpenEMFDatabase : RoomDatabase() {
 /**
  * Stored measurement with optional location.
  */
-@Entity(tableName = "measurements")
+@Entity(tableName = "measurements", indices = [Index("timestamp")])
 data class MeasurementEntity(
     @PrimaryKey
     val id: String,
@@ -57,7 +61,8 @@ data class MeasurementEntity(
     // Dominant source info
     val dominantSourceName: String?,
     val dominantSourceType: String?,
-    val dominantSourcePercent: Int?
+    val dominantSourcePercent: Int?,
+    val indexAvailable: Boolean = false
 )
 
 /**
@@ -84,6 +89,22 @@ data class PlaceEntity(
 
 @Dao
 interface MeasurementDao {
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertCaptureSummary(measurement: MeasurementEntity): Long
+
+    @Query("""SELECT COUNT(*) AS totalCount, COUNT(CASE WHEN indexAvailable=1 THEN 1 END) AS scoredCount,
+        AVG(CASE WHEN indexAvailable=1 THEN eScore END) AS averageScore,
+        MIN(CASE WHEN indexAvailable=1 THEN eScore END) AS minScore,
+        MAX(CASE WHEN indexAvailable=1 THEN eScore END) AS maxScore, MAX(timestamp) AS mostRecentTimestamp
+        FROM measurements""")
+    suspend fun statistics(): StoredStatistics
+
+    @Query("""SELECT dominantSourceType FROM measurements WHERE indexAvailable=1 AND dominantSourceType IS NOT NULL
+        GROUP BY dominantSourceType ORDER BY COUNT(*) DESC, dominantSourceType LIMIT 1""")
+    suspend fun mostFrequentDominantType(): String?
+
+    @Query("DELETE FROM measurements WHERE id=:id")
+    suspend fun deleteById(id: String)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(measurement: MeasurementEntity)
 
@@ -161,11 +182,27 @@ interface PlaceDao {
 
 class Converters {
     @TypeConverter
+    fun fromBands(value: List<Int>?): String? = value?.joinToString(";")
+
+    @TypeConverter
+    fun toBands(value: String?): List<Int>? = value?.let {
+        if (it.isEmpty()) emptyList() else it.split(';').map(String::toInt)
+    }
+    @TypeConverter
     fun fromInstant(value: Instant?): Long? = value?.toEpochMilli()
 
     @TypeConverter
     fun toInstant(value: Long?): Instant? = value?.let { Instant.ofEpochMilli(it) }
 }
+
+data class StoredStatistics(
+    val totalCount: Int,
+    val scoredCount: Int,
+    val averageScore: Double?,
+    val minScore: Int?,
+    val maxScore: Int?,
+    val mostRecentTimestamp: Instant?
+)
 
 // ==================== Place Icons ====================
 

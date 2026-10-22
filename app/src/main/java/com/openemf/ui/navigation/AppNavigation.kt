@@ -57,9 +57,11 @@ fun MainAppScaffold(
     sensorState: SensorState,
     scanBudget: ScanBudget,
     lastMeasurement: Measurement?,
-    measurementHistory: List<Measurement>,
+    measurementHistory: List<MeasurementEntity>,
+    historyError: String?,
     onScanClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onHistoryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var currentDestination by remember { mutableStateOf(NavDestination.LIVE) }
@@ -97,7 +99,7 @@ fun MainAppScaffold(
                     scanBudget = scanBudget,
                     lastMeasurement = lastMeasurement,
                     onScanClick = onScanClick,
-                    onHistoryClick = { currentDestination = NavDestination.STATISTICS },
+                    onHistoryClick = onHistoryClick,
                     onSolutionsClick = { currentDestination = NavDestination.SOLUTIONS },
                     onSettingsClick = onSettingsClick,
                     modifier = Modifier.padding(padding)
@@ -116,7 +118,7 @@ fun MainAppScaffold(
                     scanBudget = scanBudget,
                     lastMeasurement = lastMeasurement,
                     onScanClick = onScanClick,
-                    onHistoryClick = { currentDestination = NavDestination.STATISTICS },
+                    onHistoryClick = onHistoryClick,
                     onSolutionsClick = { currentDestination = NavDestination.SOLUTIONS },
                     onSettingsClick = onSettingsClick,
                     modifier = Modifier.padding(padding)
@@ -125,7 +127,8 @@ fun MainAppScaffold(
             NavDestination.STATISTICS -> {
                 StatisticsScreen(
                     measurementHistory = measurementHistory,
-                    currentMeasurement = lastMeasurement,
+                    historyError = historyError,
+                    onHistoryClick = onHistoryClick,
                     onSettingsClick = onSettingsClick,
                     modifier = Modifier.padding(padding)
                 )

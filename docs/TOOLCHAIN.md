@@ -83,8 +83,11 @@ The debug APK's v2 signature verifies. APK metadata confirms package
 `com.openemf.app`, version `1.0.0` (code 1), minimum API 26, and target/compile
 API 37. No physical-device, emulator, UI, radio, or database migration tests were
 performed. Room's schema declaration is unchanged; compatibility with existing
-installed data has not been exercised. Its inherited destructive-migration
-fallback must be replaced by an explicit migration in the history milestone.
+installed data has not been exercised. At this checkpoint an explicit database
+migration was planned for the history milestone. The user later cancelled that
+requirement and assumed fresh installations for all users; see
+[HISTORY.md](HISTORY.md). That change removes the inherited destructive fallback
+and creates a new first-install schema directly.
 
 Remaining warnings include inherited UI deprecations and Room's deprecated
 destructive-migration API. Gradle also reports deprecated configuration
