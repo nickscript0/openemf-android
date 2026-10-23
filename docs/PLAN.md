@@ -161,8 +161,17 @@ or phone compatibility as verified without actually exercising them.
   zero errors, 73 warnings, and one hint. See [RECORDING.md](RECORDING.md) for
   execution, power, permission, scan-limit, and interruption behavior. Physical
   service enforcement, screen-off recording, and notification UI remain untested.
-- Next implementation milestone: technical signal lists/details and durable
-  history charts alongside the relative received-signal dashboard.
+- Technical signal views and durable history charts are implemented and
+  host-validated. Signals is the default view; per-source power/quality charts
+  preserve observation times and collapse repeated cache reads. The separate
+  relative dashboard and capture-time trends remain available without safety
+  bands. All 181 host tests pass; lint has zero errors, 69 warnings, and one
+  hint. Light/dark Compose host previews were reviewed. See
+  [TECHNICAL_VIEWS.md](TECHNICAL_VIEWS.md) for behavior, bounds, and evidence.
+- The planned implementation milestones are now host-validated. The remaining
+  validation gate is personal installation and physical Pixel testing when the
+  user resumes it: confirm the actual OS/build, then exercise radio acquisition,
+  permissions, UI/export, notification controls, and screen-off recording.
 - The user reports Android 17 on the Pixel and explicitly excludes older Android
   support. Minimum SDK is raised separately to API 37. Device testing remains
   deferred; the phone's release/API/build have not been read through ADB, and no

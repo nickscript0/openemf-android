@@ -8,9 +8,15 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.openemf.data.database.*
+import com.openemf.ui.components.SignalHistoryChart
+import com.openemf.ui.components.TechnicalObservationCard
+import com.openemf.ui.model.HistoryRange
+import com.openemf.ui.model.readable
+import com.openemf.ui.viewmodel.SourceChartState
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -31,7 +37,8 @@ fun HistoryScreen(
     onMeasurementClick: (MeasurementEntity) -> Unit,
     onSourceClick: (SourceHistorySummary) -> Unit
 ) {
-    var sourceTab by remember { mutableStateOf(false) }
+    var sourceTab by rememberSaveable { mutableStateOf(true) }
+    var filter by rememberSaveable { mutableStateOf("") }
     Scaffold(topBar = {
         TopAppBar(title = { Text("Stored history") }, navigationIcon = {
             IconButton(onClick = onBackClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
@@ -46,8 +53,11 @@ fun HistoryScreen(
             LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (sourceTab) {
                     item { Text("Source identity follows the observed BSSID, Bluetooth address, or cell identity. Addresses can rotate. Counts include repeated cached observations.") }
+                    item { OutlinedTextField(filter, { filter = it }, label = { Text("Filter saved sources") },
+                        singleLine = true, modifier = Modifier.fillMaxWidth()) }
                     if (sources.isEmpty()) item { Text("No signal observations saved yet.") }
-                    items(sources, key = { "${it.sourceType}:${it.sourceId}" }) { source ->
+                    items(sources.filter { filter.isBlank() || it.sourceId.contains(filter, true) || it.name.orEmpty().contains(filter, true) },
+                        key = { "${it.sourceType}:${it.sourceId}" }) { source ->
                         Card(onClick = { onSourceClick(source) }, modifier = Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(16.dp)) {
                                 Text(source.name ?: source.sourceId, style = MaterialTheme.typography.titleMedium)
@@ -118,6 +128,8 @@ fun SourceHistoryScreen(
     loading: Boolean,
     error: String?,
     hasMore: Boolean,
+    chart: SourceChartState,
+    onRange: (HistoryRange) -> Unit,
     onLoadMore: () -> Unit,
     onRefresh: () -> Unit,
     onBackClick: () -> Unit
@@ -133,10 +145,18 @@ fun SourceHistoryScreen(
                 Text(sourceId, style = MaterialTheme.typography.titleSmall)
                 Text("${records.size} capture appearances loaded. Repeated cache reads retain their original observation time.")
             }
+            item { SignalHistoryChart(chart, onRange) }
+            item {
+                Text("Raw capture appearances", style = MaterialTheme.typography.titleLarge)
+                Text("Raw rows are a snapshot; Refresh reloads them. The chart follows stored updates.",
+                    style = MaterialTheme.typography.bodySmall)
+            }
             error?.let { item { Text(it, color = MaterialTheme.colorScheme.error) } }
             items(records, key = { it.observation.rowId }) { record ->
                 Column {
                     Text("Captured ${record.capturedAt.display()} · ${record.captureMode}")
+                    Text("${if (record.isForeground) "App visible" else "App in background"} · session ${record.recordingSessionId ?: "none"}",
+                        style = MaterialTheme.typography.bodySmall)
                     Text("${record.acquisitionStatus}${record.acquisitionDetail?.let { " · $it" } ?: ""}")
                     SavedObservationCard(record.observation)
                 }
@@ -151,31 +171,8 @@ fun SourceHistoryScreen(
 }
 
 @Composable
-private fun SavedObservationCard(observation: SignalObservationEntity, onClick: () -> Unit = {}) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(observation.name ?: observation.sourceId, style = MaterialTheme.typography.titleMedium)
-            Text("${observation.signalMetric}: ${observation.signalDbm?.let { "$it dBm" } ?: "Unavailable"}")
-            Text("${observation.freshnessAtCapture} at capture${if (observation.cached) " · cached" else ""}")
-            Text("Observed: ${observation.observedAt?.display() ?: "Unknown"} · ${observation.timeBasis}")
-            Text("Age at capture: ${observation.ageAtCaptureMs?.let { "${it / 1000}s" } ?: "Unknown"}")
-            Text(observation.sourceId, style = MaterialTheme.typography.bodySmall)
-            observation.wifi?.let {
-                Text("${it.frequencyMhz?.let { value -> "$value MHz" } ?: "Frequency unknown"} · channel ${it.channel ?: "unknown"} · ${it.channelWidth}")
-                Text("${it.standard} · ${it.security}")
-            }
-            observation.bluetooth?.let { Text("${it.transport} · connection ${it.connected?.toString() ?: "unknown"}") }
-            observation.cellular?.let {
-                Text("${it.technology} · cell ${it.cellId ?: "unknown"} · subscription ${it.subscriptionId ?: "unknown"}")
-                it.details?.let { details ->
-                    Text("PLMN ${details.plmn ?: "unknown"} · bands ${details.bands.joinToString().ifEmpty { "unknown" }}")
-                    if (details.nci != null) Text("NCI ${details.nci} · NR-ARFCN ${details.nrArfcn ?: "unknown"}")
-                    if (details.ssRsrp != null) Text("SS-RSRP ${details.ssRsrp} dBm · SS-RSRQ ${details.ssRsrq ?: "?"} dB · SS-SINR ${details.ssSinr ?: "?"} dB")
-                    if (details.csiRsrp != null) Text("CSI-RSRP ${details.csiRsrp} dBm · CSI-RSRQ ${details.csiRsrq ?: "?"} dB · CSI-SINR ${details.csiSinr ?: "?"} dB")
-                    details.rsrp?.let { value -> Text("RSRP $value dBm · RSRQ ${details.rsrq ?: "?"} dB") }
-                    details.rssnrDb?.let { value -> Text("RSSNR $value dB · raw ${details.rssnr}") }
-                }
-            }
-        }
-    }
+private fun SavedObservationCard(observation: SignalObservationEntity, onClick: (() -> Unit)? = null) {
+    TechnicalObservationCard(observation,
+        "${observation.freshnessAtCapture.name.readable()} at capture${if (observation.cached) " · cached" else ""}",
+        onHistory = onClick)
 }

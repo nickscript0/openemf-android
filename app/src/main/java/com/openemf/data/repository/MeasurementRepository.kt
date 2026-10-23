@@ -129,6 +129,8 @@ class MeasurementRepository @Inject constructor(
     fun getSources(): Flow<List<SourceHistorySummary>> = observationDao.sources()
 
     fun getObservations(measurementId: String) = observationDao.forMeasurement(measurementId)
+    fun observeSourceChart(type: SourceType, sourceId: String, since: Instant) =
+        observationDao.chartWindow(type, sourceId, since, 2001)
     suspend fun getAcquisitions(measurementId: String) = observationDao.getAcquisitions(measurementId)
 
     suspend fun getSourceHistory(type: SourceType, sourceId: String, limit: Int = 100, beforeRowId: Long? = null): List<ObservationRecord> {

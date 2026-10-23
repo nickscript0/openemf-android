@@ -1,0 +1,275 @@
+{
+  "date": "2026-10-22",
+  "phase": "technical signal views and durable per-source charts",
+  "previous_checkpoint": "b170e06",
+  "separate_dependency_setup_commit": "327d800",
+  "minSdk": 37,
+  "compileSdk": 37,
+  "targetSdk": 37,
+  "jdk": "Android Studio JBR 25.0.3",
+  "gradle": "9.8.2",
+  "agp": "9.4.1",
+  "kotlin": "2.4.21",
+  "compose_bom": "2026.09.00",
+  "compose_ui_test": "1.12.1",
+  "compose_test_rule_api": "v2",
+  "espresso": "3.7.0",
+  "robolectric": "4.17",
+  "lifecycle_runtime_compose": "2.11.0",
+  "tests": {
+    "tests": 181,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "name": "com.openemf.data.HistoryStorageTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.data.RawObservationCsvTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.recording.RecordingAndroidContractTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.recording.RecordingJournalTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.recording.RecordingPolicyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.recording.RecordingRunnerTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.AcquisitionLifecycleTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.AcquisitionPolicyTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.EScoreCalculatorTest",
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ExposureIndexTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.PermissionPolicyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.RegulatoryGuidelinesTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanReservationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.ScanSchedulerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.SourceDetailsTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.sensors.WifiChannelsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.ui.ChartStorageTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.ui.SignalHistoryTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.openemf.ui.TechnicalUiTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "new_tests": 14,
+  "native_compose_ui_tests": 4,
+  "host_test_api": 37,
+  "host_ui_qualifiers": "w448dp-h956dp-xxhdpi",
+  "host_previews": [
+    {
+      "path": "docs/previews/signals-light.png",
+      "sha256": "14df9bf83fa4ac238f2732a2726d99910f04d7e9b2157c6329f39764dff42b87",
+      "kind": "Robolectric API 37 native-graphics host render; not a device screenshot",
+      "width_px": 1344,
+      "height_px": 2868
+    },
+    {
+      "path": "docs/previews/relative-index-light.png",
+      "sha256": "1f349a5e9adec805776b7b75ece7958e049c4366c00c5a5d063f762a013e5bd8",
+      "kind": "Robolectric API 37 native-graphics host render; not a device screenshot",
+      "width_px": 1344,
+      "height_px": 2868
+    },
+    {
+      "path": "docs/previews/nr-quality-dark.png",
+      "sha256": "cb4c6ebf454e275353da85484836639fe794a579e837d3c76a3738e810cdade7",
+      "kind": "Robolectric API 37 native-graphics host render; not a device screenshot",
+      "width_px": 1344,
+      "height_px": 2268
+    }
+  ],
+  "lint": {
+    "Error": 0,
+    "Warning": 69,
+    "Hint": 1
+  },
+  "lint_by_id": {
+    "AutoboxingStateCreation": 1,
+    "DefaultLocale": 13,
+    "IconLocation": 1,
+    "ModifierParameter": 1,
+    "MonochromeLauncherIcon": 6,
+    "NotShrinkingResources": 1,
+    "ObsoleteSdkInt": 35,
+    "UnusedResources": 8,
+    "UseKtx": 2,
+    "UseTomlInstead": 2
+  },
+  "build": {
+    "successful": true,
+    "duration_seconds": 44,
+    "actionable_tasks": 63,
+    "tasks_executed": 18,
+    "tasks_up_to_date": 45,
+    "log": "technical-build.log",
+    "omitted_native_frame_diagnostic_lines": 44,
+    "command": "env JAVA_HOME='/Applications/Android Studio.app/Contents/jbr/Contents/Home' ANDROID_HOME=/Users/nsvarich/Library/Android/sdk ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug --continue --no-daemon --console=plain --warning-mode all"
+  },
+  "database_schema_version": 2,
+  "database_schema_changed": false,
+  "database_schema_sha256": "0e20bf733c5cd8a1aec26a8862e9828cda64752b97d2f744c23e902caa670089",
+  "migration_added": false,
+  "fresh_install_assumption": true,
+  "technical_views": {
+    "default_destination": "Signals",
+    "radio_tabs": [
+      "Wi-Fi",
+      "Bluetooth",
+      "Cellular"
+    ],
+    "power_and_quality_units": [
+      "dBm",
+      "dB"
+    ],
+    "full_width_nci_display": true,
+    "source_filter_and_sort": true,
+    "paired_inventory_has_no_synthetic_power": true,
+    "history_ranges_seconds": [
+      3600,
+      86400,
+      604800
+    ],
+    "chart_query_limit": 2001,
+    "chart_display_appearance_limit": 2000,
+    "raw_history_page_size": 100,
+    "chart_independent_of_raw_pager": true,
+    "reactive_room_chart_query": true,
+    "chart_time_axis": "observation time; relative-index trends use capture time",
+    "chart_freshness_policy": "Fresh at capture, known time, finite numeric metric, within window",
+    "cache_repeat_identity": "source + metric + boot count/boot time when available, otherwise wall timestamp",
+    "chart_gaps": "Scatter plot; no connecting/interpolating lines",
+    "chart_selection": [
+      "tap nearest dot",
+      "Older",
+      "Newer"
+    ],
+    "unavailable_values_replaced_with_zero": false,
+    "lifecycle_aware_navigation_collection": true,
+    "relative_dashboard_retained": true,
+    "relative_dashboard_safety_legend_hidden": true,
+    "main_web_and_health_advice_tabs_removed": true,
+    "maps_coordinates_cloud_and_publishing_added": false
+  },
+  "apk_path": "app/build/outputs/apk/debug/app-debug.apk",
+  "apk_sha256": "0f55adacf4ecc95e81d30fe87cab0f2aab2dd6c0549b3180d335e26944d7698b",
+  "apk_size_bytes": 75815607,
+  "apk_min_api_verified": 37,
+  "apk_v2_signature_verified": true,
+  "user_reported_pixel_android_version": "17",
+  "pixel_release_api_build_read_from_device": false,
+  "physical_device_tests_performed": false,
+  "emulator_tests_performed": false,
+  "real_radio_scan_tests_performed": false,
+  "real_notification_drawer_tested": false,
+  "screen_off_radio_and_power_behavior_tested": false,
+  "accessibility_service_tested": false,
+  "document_picker_ui_tested": false,
+  "device_testing_deferred_by_user": true,
+  "electrosmart_reference_modified": false
+}

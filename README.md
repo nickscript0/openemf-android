@@ -9,6 +9,8 @@ See [the agreed plan](docs/PLAN.md) and [baseline evidence](docs/BASELINE.md).
 
 ## Current capabilities
 
+- A technical Signals home screen with per-radio tabs, received power and quality,
+  live freshness, name/identity filtering, and expandable details.
 - Wi-Fi observations with BSSID, received power, frequency, corrected 2.4/5/6 GHz
   channels, width, standard, and security information.
 - Bounded BLE and Classic Bluetooth discovery. Paired devices are separate
@@ -17,7 +19,7 @@ See [the agreed plan](docs/PLAN.md) and [baseline evidence](docs/BASELINE.md).
   reported NR SS/CSI power and quality metrics.
 - Per-radio acquisition status, explicit missing values, observation timestamps,
   cached-data provenance, and freshness indicators.
-- A relative received-signal dashboard. Stale, unknown-age, and unavailable
+- A separate relative received-signal dashboard. Stale, unknown-age, and unavailable
   measurements do not enter the current index. The index is not a calibrated
   exposure or safety measurement.
 - Live refresh while the app is visible, respecting Android scan limits.
@@ -27,13 +29,16 @@ See [the agreed plan](docs/PLAN.md) and [baseline evidence](docs/BASELINE.md).
 
 Individual signal observations and capture summaries are stored in Room.
 History includes saved captures, acquisition status, and paged per-source
-timelines. Statistics read durable history. Settings exports raw signal CSV
-through Android's document picker. See [history notes](docs/HISTORY.md).
+timelines. Source charts separate RSSI/RSRP power from LTE/NR quality metrics,
+use real observation times, and collapse repeated cache reads. Select 1-hour,
+24-hour, or 7-day windows and inspect individual samples. Relative-index trends
+read durable captures. Settings exports raw signal CSV through Android's document
+picker. See [technical views](docs/TECHNICAL_VIEWS.md) and [history notes](docs/HISTORY.md).
 
 This development version assumes fresh installations for all users, as agreed;
 it creates the current database schema directly and does not upgrade earlier
-development databases. Technical history charts and further UI refinements are
-the next milestone. Maps, coordinate recording, cloud services, and store
+development databases. The next validation step is testing on the confirmed
+Pixel when device testing resumes. Maps, coordinate recording, cloud services, and store
 publishing are deferred. Automatic app backup/transfer is excluded; raw CSV
 export is user-initiated.
 

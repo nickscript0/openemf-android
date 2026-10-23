@@ -132,6 +132,10 @@ interface ObservationDao {
     @Query(JOINED + " WHERE s.sourceType=:type AND s.sourceId=:sourceId AND (:beforeRowId IS NULL OR s.rowId < :beforeRowId) ORDER BY s.rowId DESC LIMIT :limit")
     suspend fun sourceHistory(type: SourceType, sourceId: String, limit: Int, beforeRowId: Long?): List<ObservationRecord>
 
+    // A bounded reactive chart window, independent of the raw-history pagination cursor.
+    @Query(JOINED + " WHERE s.sourceType=:type AND s.sourceId=:sourceId AND m.timestamp >= :since ORDER BY m.timestamp DESC, s.rowId DESC LIMIT :limit")
+    fun chartWindow(type: SourceType, sourceId: String, since: Instant, limit: Int): kotlinx.coroutines.flow.Flow<List<ObservationRecord>>
+
     @Query("SELECT COALESCE(MAX(rowId), 0) FROM signal_observations")
     suspend fun maxRowId(): Long
 

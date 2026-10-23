@@ -121,7 +121,7 @@ private fun SourceRow(
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "$count sources detected",
+                text = "$count fresh readings",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

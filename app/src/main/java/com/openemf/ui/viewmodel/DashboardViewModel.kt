@@ -46,8 +46,6 @@ class DashboardViewModel @Inject constructor(
     fun observations(id: String) = repository.getObservations(id)
         .catch { _historyError.value = it.message ?: "Could not read observations"; emit(emptyList()) }
     suspend fun acquisitions(id: String) = repository.getAcquisitions(id)
-    suspend fun sourceHistory(type: SourceType, sourceId: String, before: Long?) =
-        repository.getSourceHistory(type, sourceId, beforeRowId = before)
 
     /** Places with statistics */
     val places: StateFlow<List<PlaceWithStats>> = repository.getPlacesWithStats()

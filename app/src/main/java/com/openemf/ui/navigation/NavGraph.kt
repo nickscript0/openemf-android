@@ -1,10 +1,10 @@
 package com.openemf.ui.navigation
 
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.openemf.data.database.ObservationRecord
 import com.openemf.data.database.RadioAcquisitionEntity
 import com.openemf.sensors.api.SourceType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -19,6 +19,7 @@ import com.openemf.ui.theme.ThemeMode
 import com.openemf.ui.viewmodel.DashboardViewModel
 import com.openemf.ui.viewmodel.SettingsViewModel
 import com.openemf.ui.viewmodel.RecordingViewModel
+import com.openemf.ui.viewmodel.SourceHistoryViewModel
 import com.openemf.ui.components.RecordingControls
 
 /**
@@ -38,7 +39,7 @@ sealed class Screen(val route: String) {
 
 /**
  * Main navigation graph.
- * Uses MainAppScaffold with bottom navigation for Live/Web/Statistics/Solutions.
+ * Technical signals, relative index, and durable trends share the main scaffold.
  */
 @Composable
 fun OpenEMFNavGraph(
@@ -50,34 +51,34 @@ fun OpenEMFNavGraph(
     val dashboardViewModel: DashboardViewModel = hiltViewModel()
     val settingsViewModel: SettingsViewModel = hiltViewModel()
     val recordingViewModel: RecordingViewModel = hiltViewModel()
-    val recordingState by recordingViewModel.state.collectAsState()
-    val sessions by recordingViewModel.recentSessions.collectAsState()
-    val journalError by recordingViewModel.journalError.collectAsState()
+    val recordingState by recordingViewModel.state.collectAsStateWithLifecycle()
+    val sessions by recordingViewModel.recentSessions.collectAsStateWithLifecycle()
+    val journalError by recordingViewModel.journalError.collectAsStateWithLifecycle()
     val recordingControls: @Composable () -> Unit = {
         RecordingControls(recordingState, sessions.firstOrNull(), journalError, onStartRecording,
             recordingViewModel::pause, recordingViewModel::resume, recordingViewModel::stop)
     }
 
     // Collect states
-    val sensorState by dashboardViewModel.sensorState.collectAsState()
-    val scanBudget by dashboardViewModel.scanBudget.collectAsState()
-    val lastMeasurement by dashboardViewModel.lastMeasurement.collectAsState()
-    val measurementHistory by dashboardViewModel.measurementHistory.collectAsState()
-    val sources by dashboardViewModel.sources.collectAsState()
-    val historyError by dashboardViewModel.historyError.collectAsState()
+    val sensorState by dashboardViewModel.sensorState.collectAsStateWithLifecycle()
+    val scanBudget by dashboardViewModel.scanBudget.collectAsStateWithLifecycle()
+    val lastMeasurement by dashboardViewModel.lastMeasurement.collectAsStateWithLifecycle()
+    val measurementHistory by dashboardViewModel.measurementHistory.collectAsStateWithLifecycle()
+    val sources by dashboardViewModel.sources.collectAsStateWithLifecycle()
+    val historyError by dashboardViewModel.historyError.collectAsStateWithLifecycle()
 
-    val settingsPermissions by settingsViewModel.permissionStatus.collectAsState()
-    val monitoringEnabled by settingsViewModel.monitoringEnabled.collectAsState()
-    val monitoringInterval by settingsViewModel.monitoringInterval.collectAsState()
-    val themeMode by settingsViewModel.themeMode.collectAsState()
-    val clearHistoryState by settingsViewModel.clearHistoryState.collectAsState()
-    val exportState by settingsViewModel.exportState.collectAsState()
+    val settingsPermissions by settingsViewModel.permissionStatus.collectAsStateWithLifecycle()
+    val monitoringEnabled by settingsViewModel.monitoringEnabled.collectAsStateWithLifecycle()
+    val monitoringInterval by settingsViewModel.monitoringInterval.collectAsStateWithLifecycle()
+    val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
+    val clearHistoryState by settingsViewModel.clearHistoryState.collectAsStateWithLifecycle()
+    val exportState by settingsViewModel.exportState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
         startDestination = Screen.Main.route
     ) {
-        // Main screen with bottom navigation (Live, Web, Statistics, Solutions)
+        // Technical signals are the default destination.
         composable(Screen.Main.route) {
             MainAppScaffold(
                 sensorState = sensorState,
@@ -88,6 +89,8 @@ fun OpenEMFNavGraph(
                 recordingState = recordingState,
                 recordingContent = recordingControls,
                 onStopRecording = recordingViewModel::stop,
+                onRequestPermissions = onRequestPermissions,
+                onSourceClick = { type, id -> navController.navigate(Screen.SourceHistory.createRoute(type, id)) },
                 onHistoryClick = { navController.navigate(Screen.History.route) },
                 onScanClick = { if (!recordingState.active) dashboardViewModel.measureNow() },
                 onSettingsClick = { navController.navigate(Screen.Settings.route) }
@@ -105,7 +108,7 @@ fun OpenEMFNavGraph(
             val measurement = measurementHistory.find { it.id == measurementId }
 
             val observations by remember(measurementId) { dashboardViewModel.observations(measurementId ?: "") }
-                .collectAsState(initial = emptyList())
+                .collectAsStateWithLifecycle(initialValue = emptyList())
             var detailError by remember(measurementId) { mutableStateOf<String?>(null) }
             val acquisitions by produceState<List<RadioAcquisitionEntity>>(emptyList(), measurementId) {
                 try { value = dashboardViewModel.acquisitions(measurementId ?: "") }
@@ -131,27 +134,13 @@ fun OpenEMFNavGraph(
         composable(Screen.SourceHistory.route, arguments = listOf(
             navArgument("type") { type = NavType.StringType }, navArgument("sourceId") { type = NavType.StringType }
         )) { entry ->
-            val type = SourceType.valueOf(entry.arguments!!.getString("type")!!)
-            val sourceId = entry.arguments!!.getString("sourceId")!!
-            var records by remember(type, sourceId) { mutableStateOf<List<ObservationRecord>>(emptyList()) }
-            var request by remember { mutableIntStateOf(0) }
-            var loading by remember { mutableStateOf(true) }
-            var hasMore by remember { mutableStateOf(true) }
-            var error by remember { mutableStateOf<String?>(null) }
-            LaunchedEffect(type, sourceId, request) {
-                loading = true
-                error = null
-                try {
-                    val page = dashboardViewModel.sourceHistory(type, sourceId, records.lastOrNull()?.observation?.rowId)
-                    records = records + page
-                    hasMore = page.size == 100
-                } catch (e: kotlinx.coroutines.CancellationException) { throw e
-                } catch (e: Exception) { error = e.message ?: "Could not load signal history"
-                } finally { loading = false }
-            }
-            SourceHistoryScreen(sourceId, records, loading, error, hasMore,
-                onLoadMore = { request++ },
-                onRefresh = { records = emptyList(); hasMore = true; request++ },
+            val model: SourceHistoryViewModel = hiltViewModel(entry)
+            val timeline by model.timeline.collectAsStateWithLifecycle()
+            val chart by model.chart.collectAsStateWithLifecycle()
+            SourceHistoryScreen(model.sourceId, timeline.records, timeline.loading, timeline.error, timeline.hasMore,
+                chart = chart, onRange = model::selectRange,
+                onLoadMore = model::loadMore,
+                onRefresh = model::refresh,
                 onBackClick = { navController.popBackStack() })
         }
 
