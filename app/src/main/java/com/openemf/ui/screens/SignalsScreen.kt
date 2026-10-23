@@ -54,12 +54,10 @@ fun SignalsScreen(
             IconButton(onClick = onSettings) { Icon(Icons.Default.Settings, "Settings") }
         })
     }) { padding ->
-        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)) {
             item {
-                Text("Radio measurements", style = MaterialTheme.typography.headlineMedium)
-                Text("Received power and quality, with Android acquisition status.",
-                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Radio measurements", style = MaterialTheme.typography.titleLarge)
             }
             item { recordingContent() }
             item {
@@ -91,8 +89,12 @@ fun SignalsScreen(
                     style = MaterialTheme.typography.bodySmall)
                 OutlinedTextField(value = filter, onValueChange = { filter = it }, singleLine = true,
                     label = { Text("Filter name or identity") }, modifier = Modifier.fillMaxWidth())
-                TextButton(onClick = { strongestFirst = !strongestFirst }) {
-                    Text(if (strongestFirst) "Sort: strongest first" else "Sort: name")
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Text("${filtered.size} found · tap for details", style = MaterialTheme.typography.labelSmall)
+                    TextButton(onClick = { strongestFirst = !strongestFirst }) {
+                        Text(if (strongestFirst) "Sort: strongest first" else "Sort: name", style = MaterialTheme.typography.labelSmall)
+                    }
                 }
             }
             if (filtered.isEmpty()) item {
@@ -103,7 +105,7 @@ fun SignalsScreen(
             items(filtered, key = { "${it.type}:${it.id}" }) { source ->
                 observations[source.type to source.id]?.let { observation ->
                     TechnicalObservationCard(observation, observationText(source.observation, now),
-                        onHistory = { onSource(source.type, source.id) })
+                        onHistory = { onSource(source.type, source.id) }, compact = true)
                 }
             }
             if (selected == SourceType.BLUETOOTH && measurement?.pairedBluetoothDevices?.isNotEmpty() == true) item {

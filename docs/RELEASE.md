@@ -2,8 +2,10 @@
 
 The personal release workflow builds and signs on the Mac, then installs through
 USB/ADB. It does not publish to a store, register the app with Google, upload a
-signing key, or introduce a cloud dependency. The first personal release is
-**1.1.0 (version code 2)**, for Android 17/API 37 only.
+signing key, or introduce a cloud dependency. The current personal release is
+**1.1.1 (version code 3)**, for Android 17/API 37 only. The first personal release
+was 1.1.0 (version code 2); its original validation below remains checkpoint
+evidence.
 
 ## Build and sign
 
@@ -19,10 +21,10 @@ rejects debuggable APKs or a minimum API other than 37, signs with the external
 private key, verifies signatures and 16 KB ZIP alignment, and writes:
 
 ```text
-app/build/outputs/apk/personal/openemf-1.1.0-2.apk
-app/build/outputs/apk/personal/openemf-1.1.0-2.json
-app/build/outputs/apk/personal/openemf-1.1.0-2-signature.txt
-app/build/outputs/apk/personal/openemf-1.1.0-2-mapping.txt
+app/build/outputs/apk/personal/openemf-1.1.1-3.apk
+app/build/outputs/apk/personal/openemf-1.1.1-3.json
+app/build/outputs/apk/personal/openemf-1.1.1-3-signature.txt
+app/build/outputs/apk/personal/openemf-1.1.1-3-mapping.txt
 ```
 
 Keep the version-matched R8 mapping file with each APK for decoding any future
@@ -141,3 +143,34 @@ backup of the private signing directory for future updates.
 
 Interruption handling, unplugged overnight recording/battery testing, and actual
 NR measurements remain deferred as described in [radio validation](RADIO_VALIDATION.md).
+
+## Compact-list update: 1.1.1 (2026-10-23)
+
+- Includes the compact live-radio layout with a small information footer;
+  source identities, metrics, radio summaries, freshness, and out-of-range
+  explanations remain visible. See [COMPACT_SIGNALS.md](COMPACT_SIGNALS.md).
+- Confirmed Pixel 9 Pro XL, Android 17/API 37, build CP3A.261005.005 through USB
+  before installation. Installed version was 1.1.0/code 2; recording was stopped.
+- Required release build, 182 debug-variant host tests, and debug/release lint
+  passed in 89 seconds. Both lint variants report zero errors, 67 warnings, and
+  one hint. See [build log](compact-release-build.log) and
+  [structured results](compact-release-validation.json).
+- Reused the external personal signing key and lineage; V3 signature and 16 KB
+  alignment passed. APK is 8,334,820 bytes, non-debuggable, optimized, and API 37
+  only. [Signing log](compact-release-signing.log) and
+  [signature report](compact-release-signature.txt). SHA-256:
+  `60717d697ed75e6c9a8bddac0190730927aca7a0d4b0811a2c601dac272860a3`.
+- `adb install -r` succeeded. Package metadata reports 1.1.1/code 3, retained
+  original first-install time, and retained Location, Bluetooth, and notification
+  grants. Read-back installed APK bytes match the signed artifact exactly.
+- No uninstall, data clear, schema change, signing-key replacement, or migration
+  was performed. Before installation, History displayed 24 captures and 189
+  source identities. The phone was locked after installation, and the user
+  explicitly skipped the post-update visual/history-count checks. No further
+  phone interaction followed that request. No claim of post-update history-count
+  verification or a new CSV field-by-field comparison is made.
+
+Raw UI snapshots and copies of both installed APKs remain in a private local
+temporary folder outside Git. The matching R8 mapping stays beside the release
+artifact. Wireless pairing attempts did not establish a connection; this update
+was installed through the user's subsequently connected USB cable.

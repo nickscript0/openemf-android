@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-23",
+  "artifact": {
+    "application_id": "com.openemf.app",
+    "version_name": "1.1.1",
+    "version_code": 3,
+    "min_api": 37,
+    "debuggable": false,
+    "minified": true,
+    "resource_shrinking": true,
+    "build_tools": "37.0.0",
+    "signing_lineage_included": true,
+    "size_bytes": 8334820,
+    "sha256": "60717d697ed75e6c9a8bddac0190730927aca7a0d4b0811a2c601dac272860a3",
+    "mapping_sha256": "4aa992c1ebf76dbc9f38a03e4eea164c5344e3336629442bd7478d44158968bf",
+    "apk": "app/build/outputs/apk/personal/openemf-1.1.1-3.apk"
+  },
+  "tests": {
+    "tests": 182,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "debug": {
+      "Warning": 67,
+      "Hint": 1
+    },
+    "release": {
+      "Warning": 67,
+      "Hint": 1
+    }
+  },
+  "device": {
+    "model": "Pixel 9 Pro XL",
+    "android_release": "17",
+    "api": 37,
+    "build": "CP3A.261005.005",
+    "transport": "USB",
+    "update": "adb install -r succeeded",
+    "installed_apk_matches_signed_artifact": true,
+    "permissions_retained": true,
+    "recording_before_update": "stopped",
+    "history_counts_before": {
+      "captures": 24,
+      "sources": 189
+    },
+    "ui_validation": "post-update visual and history-count checks explicitly skipped by user; no further phone interaction"
+  }
+}

@@ -13,8 +13,8 @@ android {
         applicationId = "com.openemf.app"
         minSdk = 37
         targetSdk = 37
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

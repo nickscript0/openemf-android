@@ -206,3 +206,14 @@ recording/notification controls, permissions, version display, and export were
 checked on the confirmed Pixel. No schema migration or cloud/store publication
 was added. See [RELEASE.md](RELEASE.md) for repeatable builds, private-key backup
 responsibilities, exact artifact/signature, and validation limits.
+
+## Compact live signal list (2026-10-23)
+
+Live radio results now use compact summaries with a small footer preserving
+the source identity, metric, and radio details, plus tap-to-expand technical
+fields and history access. Host build and all 182 tests pass; lint
+has zero errors. See [COMPACT_SIGNALS.md](COMPACT_SIGNALS.md) for the baseline,
+reviewed preview, and validation. Signed personal version 1.1.1/code 3 was
+installed in place through USB on the reconfirmed Android 17/API 37 Pixel;
+installed bytes and retained permissions are verified. The user explicitly
+skipped the post-update visual/history-count checks. See [RELEASE.md](RELEASE.md).

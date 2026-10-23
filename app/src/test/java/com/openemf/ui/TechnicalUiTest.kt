@@ -54,20 +54,28 @@ class TechnicalUiTest {
 
     @Test fun signalsShowTechnicalPowerThenSwitchRadiosWithoutInventingBluetoothPower() {
         var history: Pair<SourceType, String>? = null
+        val measurement = freshMeasurement().let { m ->
+            m.copy(wifiSources = (0 until 12).map { index ->
+                m.wifiSources.single().copy(id = "wifi:$index", bssid = "sample:$index",
+                    name = if (index == 0) "Home" else "Nearby network $index", rssi = -61 - index)
+            })
+        }
         compose.setContent {
             OpenEMFTheme(themeMode = ThemeMode.LIGHT) {
-                SignalsScreen(freshMeasurement(), SensorState.Idle, ScanBudget.initial(), true,
+                SignalsScreen(measurement, SensorState.Idle, ScanBudget.initial(), true,
                     {}, {}, {}, {}, { type, id -> history = type to id }, {})
             }
         }
         compose.onNodeWithText("Home").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("-61 dBm").assertIsDisplayed()
+        compose.onNodeWithText("RSSI · wifi:0 · 5955 MHz · channel 1").assertIsDisplayed()
         image("signals-light")
         compose.onNodeWithText("Wi-Fi", useUnmergedTree = true).performScrollTo()
         compose.onNodeWithText("Bluetooth", useUnmergedTree = true).performClick()
         compose.onNodeWithText("Speaker").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Unavailable").assertIsDisplayed()
-        compose.onNodeWithText("Technical details").performClick()
+        compose.onNodeWithText("RSSI · bt:bb · BLE · connection unknown").assertIsDisplayed()
+        compose.onNodeWithText("Speaker").performClick()
         compose.onNodeWithText("Unknown (discovery only)").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Signal history").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(SourceType.BLUETOOTH to "bt:bb", history) }
