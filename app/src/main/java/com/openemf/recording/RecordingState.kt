@@ -95,7 +95,6 @@ object RecordingPolicy {
         val modalities = Modality.entries.toSet() - permissions.degradedModalities
         val required = buildSet {
             add(Permission.FINE_LOCATION)
-            if (Modality.CELLULAR in modalities) add(Permission.READ_PHONE_STATE)
             if (Modality.BLUETOOTH in modalities) {
                 add(Permission.BLUETOOTH_SCAN); add(Permission.BLUETOOTH_CONNECT)
             }

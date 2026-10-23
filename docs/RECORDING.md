@@ -170,3 +170,9 @@ Primary references checked during implementation:
 - [Task Manager stop](https://developer.android.com/develop/background-work/services/fgs/handle-user-stopping).
 - [Android 17 release / API level 37](https://android-developers.googleblog.com/2026/06/Android-17.html).
 - [Android app backup](https://developer.android.com/identity/data/autobackup).
+
+## Physical validation follow-up (2026-10-23)
+
+The deferred statements above describe the original host checkpoint. Initial
+Pixel validation and the removal of unnecessary Phone permission are recorded in
+[DEVICE_VALIDATION.md](DEVICE_VALIDATION.md).

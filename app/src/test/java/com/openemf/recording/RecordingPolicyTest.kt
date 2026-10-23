@@ -16,14 +16,14 @@ class RecordingPolicyTest {
         assertNull(RecordingPolicy.failure(all, true, true))
     }
 
-    @Test fun `denied phone or Bluetooth permissions exclude only those radios at start`() {
-        val wifiOnly = setOf(Permission.FINE_LOCATION, Permission.COARSE_LOCATION)
-        val request = RecordingPolicy.request("one", 60000, PermissionPolicy.evaluate(37, wifiOnly))
-        assertEquals(setOf(Modality.WIFI), request.modalities)
+    @Test fun `Bluetooth denial leaves WiFi and cellular recording available`() {
+        val locationOnly = setOf(Permission.FINE_LOCATION, Permission.COARSE_LOCATION)
+        val request = RecordingPolicy.request("one", 60000, PermissionPolicy.evaluate(37, locationOnly))
+        assertEquals(setOf(Modality.WIFI, Modality.CELLULAR), request.modalities)
         assertEquals(setOf(Permission.FINE_LOCATION), request.requiredPermissions)
         val allRequest = RecordingPolicy.request("two", 60000, PermissionPolicy.evaluate(37, all))
         assertEquals(Modality.entries.toSet(), allRequest.modalities)
-        assertTrue(allRequest.requiredPermissions.containsAll(setOf(Permission.READ_PHONE_STATE, Permission.BLUETOOTH_SCAN, Permission.BLUETOOTH_CONNECT)))
+        assertTrue(allRequest.requiredPermissions.containsAll(setOf(Permission.BLUETOOTH_SCAN, Permission.BLUETOOTH_CONNECT)))
     }
 
     @Test fun `invalid intervals are rejected instead of silently increasing scan frequency`() {

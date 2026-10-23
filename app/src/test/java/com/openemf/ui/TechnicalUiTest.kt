@@ -114,7 +114,7 @@ class TechnicalUiTest {
         var permissions = 0
         compose.setContent {
             OpenEMFTheme(themeMode = ThemeMode.LIGHT) {
-                SignalsScreen(freshMeasurement(), SensorState.PermissionRequired(listOf(Permission.READ_PHONE_STATE), true),
+                SignalsScreen(freshMeasurement(), SensorState.PermissionRequired(listOf(Permission.BLUETOOTH_SCAN), true),
                     ScanBudget.initial(), false, {}, { permissions++ }, {}, {}, { _, _ -> }, {})
             }
         }

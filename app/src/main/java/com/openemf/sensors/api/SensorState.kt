@@ -56,7 +56,6 @@ enum class Permission {
     COARSE_LOCATION,
     BLUETOOTH_SCAN,
     BLUETOOTH_CONNECT,
-    READ_PHONE_STATE,
     NEARBY_WIFI_DEVICES
 }
 

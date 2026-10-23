@@ -92,4 +92,12 @@ class SignalHistoryTest {
         assertEquals("Unavailable", bt.powerText())
         assertEquals("Unknown (discovery only)", bt.technicalFields().toMap()["Connection"])
     }
+
+    @Test fun outOfRangeWifiPowerIsPreservedRawButExcludedFromTheTechnicalChart() {
+        val record = row().let { it.copy(observation = it.observation.copy(signalDbm = 0)) }
+        assertEquals("Out of range", record.observation.powerText())
+        assertEquals("0 dBm", record.observation.technicalFields().toMap()["Reported power (raw Android)"])
+        assertTrue(series(record).points.isEmpty())
+        assertEquals(1, series(record).excludedAppearances)
+    }
 }

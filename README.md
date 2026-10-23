@@ -37,10 +37,10 @@ picker. See [technical views](docs/TECHNICAL_VIEWS.md) and [history notes](docs/
 
 This development version assumes fresh installations for all users, as agreed;
 it creates the current database schema directly and does not upgrade earlier
-development databases. The next validation step is testing on the confirmed
-Pixel when device testing resumes. Maps, coordinate recording, cloud services, and store
-publishing are deferred. Automatic app backup/transfer is excluded; raw CSV
-export is user-initiated.
+development databases. Initial Pixel validation is recorded in
+[device validation](docs/DEVICE_VALIDATION.md). Maps, coordinate recording, cloud
+services, and store publishing are deferred. Automatic app backup/transfer is
+excluded; raw CSV export is user-initiated.
 
 ## Build and checks
 
@@ -65,16 +65,17 @@ upgrade and reproducible commands.
 
 ## Device validation
 
-The user reports Android 17 on the Pixel. Device testing is currently deferred.
-The Pixel's installed Android release and
-API level must be read from the actual phone before installing or testing an APK.
-Build success and local tests do not establish hardware scan quality or reliable
-background recording.
+ADB confirmed Pixel 9 Pro XL, Android 17/API 37, build CP3A.261005.005 before
+installation on 2026-10-23. Wi-Fi, Bluetooth, LTE, background capture persistence,
+and notification controls have been exercised. See [device evidence](docs/DEVICE_VALIDATION.md)
+for exact checks and remaining limits; short USB-powered checks do not establish
+long-term recording reliability or battery consumption.
 
-The app requests Android location permission for Wi-Fi/cellular scan APIs,
-phone-state permission for cellular updates, and Bluetooth scan/connect
-permissions. These permissions are evaluated per radio; denying
-one does not fabricate measurements or block independently authorized radios.
+The app requests Android location permission for Wi-Fi/cellular scan APIs
+and Bluetooth scan/connect permissions. No Phone permission is requested: the
+cell-information refresh API uses precise Location access. These permissions are
+evaluated per radio; denying one does not fabricate measurements or block
+independently authorized radios.
 Android Location services may also need to be enabled. Scans cannot bypass
 Android or hardware limits.
 

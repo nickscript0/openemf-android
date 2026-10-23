@@ -11,5 +11,6 @@ Prefer current stable, compatible tools and dependencies. Keep toolchain upgrade
 as separate changes; the user explicitly prefers upgrades over old-version workarounds.
 
 Target the user's Pixel on Android 17 (minimum API 37). Do not add older-Android
-compatibility work. The OS version is user-reported; device testing remains
-deferred until the phone's actual release, API level, and build are read.
+compatibility work. ADB confirmed Pixel 9 Pro XL, Android 17/API 37, build
+CP3A.261005.005 before installation on 2026-10-23. See docs/DEVICE_VALIDATION.md for performed checks
+and remaining physical validation; do not generalize a short USB-powered test.

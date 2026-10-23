@@ -25,12 +25,10 @@ class CellularScanner @Inject constructor(@ApplicationContext private val contex
     private val manager get() = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
     private fun granted(permission: String) = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
     fun isAvailable(): Boolean = manager != null && context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
-    fun hasPermissions(): Boolean = granted(Manifest.permission.READ_PHONE_STATE) &&
-        (granted(Manifest.permission.ACCESS_FINE_LOCATION) ||
-            (Build.VERSION.SDK_INT < 29 && granted(Manifest.permission.ACCESS_COARSE_LOCATION)))
+    fun hasPermissions(): Boolean = granted(Manifest.permission.ACCESS_FINE_LOCATION)
 
     suspend fun scan(): AcquisitionResult<CellularSource> {
-        if (!hasPermissions()) return result(AcquisitionStatus.PERMISSION_DENIED, "Phone state and precise location permissions are required")
+        if (!hasPermissions()) return result(AcquisitionStatus.PERMISSION_DENIED, "Precise location permission is required for cell information")
         val tm = manager ?: return result(AcquisitionStatus.UNAVAILABLE, "Cellular hardware unavailable")
         if (!isAvailable()) return result(AcquisitionStatus.UNAVAILABLE, "Cellular hardware unavailable")
         if (Settings.Global.getInt(context.contentResolver, Settings.Global.AIRPLANE_MODE_ON, 0) != 0)

@@ -8,8 +8,8 @@ Pixel 9 Pro XL running stock Android. **Read and record its installed Android
 version and API level before any device testing.** The user reports Android 17
 (API 37) on 2026-10-22. Minimum supported Android is now 17; compile, target, and
 minimum SDK are API 37. Do not spend time supporting earlier Android releases.
-This user report sets the development scope; reading the phone's actual release,
-API level, and build remains a prerequisite for device testing.
+ADB confirmed Android 17/API 37, build CP3A.261005.005 before installation on
+2026-10-23; see [DEVICE_VALIDATION.md](DEVICE_VALIDATION.md).
 
 The app is primarily for home use, with live measurements and background
 recording that the user explicitly starts and stops. Technical signal readings
@@ -58,8 +58,10 @@ connection state.
 
 ### 2. Correct signal acquisition
 
-- Request runtime `READ_PHONE_STATE` before registering cellular callbacks, with
-  permission denial/revocation handled honestly.
+- Match permissions to the actual cellular APIs and handle denial/revocation
+  honestly. The original review flagged `READ_PHONE_STATE` for a persistent
+  callback design. The implemented one-shot `requestCellInfoUpdate` API needs
+  precise Location; remove unnecessary Phone access (2026-10-23 device review).
 - Preserve full-width 5G NR cell identities and expose available NR metrics.
 - Correct Wi-Fi channel calculations, especially 6 GHz.
 - Bound scan lifetimes, release listeners/resources, respect scan throttling,
@@ -160,7 +162,8 @@ or phone compatibility as verified without actually exercising them.
   All 167 tests pass, including Android contract/Room checks on API 37; lint has
   zero errors, 73 warnings, and one hint. See [RECORDING.md](RECORDING.md) for
   execution, power, permission, scan-limit, and interruption behavior. Physical
-  service enforcement, screen-off recording, and notification UI remain untested.
+  service enforcement, screen-off recording, and notification UI were untested
+  at that checkpoint; see the later physical validation below.
 - Technical signal views and durable history charts are implemented and
   host-validated. Signals is the default view; per-source power/quality charts
   preserve observation times and collapse repeated cache reads. The separate
@@ -168,11 +171,12 @@ or phone compatibility as verified without actually exercising them.
   bands. All 181 host tests pass; lint has zero errors, 69 warnings, and one
   hint. Light/dark Compose host previews were reviewed. See
   [TECHNICAL_VIEWS.md](TECHNICAL_VIEWS.md) for behavior, bounds, and evidence.
-- The planned implementation milestones are now host-validated. The remaining
-  validation gate is personal installation and physical Pixel testing when the
-  user resumes it: confirm the actual OS/build, then exercise radio acquisition,
-  permissions, UI/export, notification controls, and screen-off recording.
 - The user reports Android 17 on the Pixel and explicitly excludes older Android
-  support. Minimum SDK is raised separately to API 37. Device testing remains
-  deferred; the phone's release/API/build have not been read through ADB, and no
-  APK has been installed or run.
+  support. Minimum SDK was raised separately to API 37. Physical testing was
+  deferred through the technical-views checkpoint.
+- The user resumed personal installation and Pixel validation on 2026-10-23. ADB
+  confirmed the actual Android 17/API 37 build before first installation. Device
+  checks exposed an unnecessary Phone permission and platform-reported Wi-Fi
+  values outside the app's expected range. Both are corrected; all 182 host tests
+  pass, with zero lint errors, 68 warnings, and one hint. Performed device checks
+  and remaining limits are tracked in [DEVICE_VALIDATION.md](DEVICE_VALIDATION.md).

@@ -93,12 +93,6 @@ fun SettingsScreen(
                     )
                 }
 
-                PermissionItem(
-                    permission = Permission.READ_PHONE_STATE,
-                    label = "Phone State",
-                    description = "Required for cellular information updates",
-                    isGranted = Permission.READ_PHONE_STATE in permissionStatus.granted
-                )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     PermissionItem(
                         permission = Permission.BLUETOOTH_CONNECT,

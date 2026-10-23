@@ -2,6 +2,7 @@ package com.openemf.ui.model
 
 import com.openemf.data.database.ObservationRecord
 import com.openemf.sensors.api.*
+import com.openemf.sensors.scoring.EScoreCalculator
 import java.time.Instant
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -21,14 +22,16 @@ enum class SignalMetric(val label: String, val unit: String) {
         val d = o.cellular?.details
         return when (this) {
             RSSI, PLATFORM_DBM ->
-                o.signalDbm?.toDouble()?.takeIf { o.signalMetric == name }
-            RSRP -> d?.rsrp?.toDouble() ?: o.signalDbm?.toDouble()?.takeIf { o.signalMetric == name }
-            SS_RSRP -> d?.ssRsrp?.toDouble() ?: o.signalDbm?.toDouble()?.takeIf { o.signalMetric == name }
+                o.measurablePower()?.toDouble()?.takeIf { o.signalMetric == name }
+            RSRP -> (d?.rsrp?.takeIf { it in EScoreCalculator.LTE_RANGE }
+                ?: o.measurablePower()?.takeIf { o.signalMetric == name })?.toDouble()
+            SS_RSRP -> (d?.ssRsrp?.takeIf { it in EScoreCalculator.NR_RANGE }
+                ?: o.measurablePower()?.takeIf { o.signalMetric == name })?.toDouble()
             RSRQ -> d?.rsrq?.toDouble()
             RSSNR -> d?.rssnrDb
             SS_RSRQ -> d?.ssRsrq?.toDouble()
             SS_SINR -> d?.ssSinr?.toDouble()
-            CSI_RSRP -> d?.csiRsrp?.toDouble()
+            CSI_RSRP -> d?.csiRsrp?.takeIf { it in EScoreCalculator.NR_RANGE }?.toDouble()
             CSI_RSRQ -> d?.csiRsrq?.toDouble()
             CSI_SINR -> d?.csiSinr?.toDouble()
         }

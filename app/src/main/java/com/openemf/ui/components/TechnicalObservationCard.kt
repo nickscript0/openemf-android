@@ -31,6 +31,10 @@ fun TechnicalObservationCard(
                 Text(freshnessLabel, style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.widthIn(max = 180.dp))
             }
+            if (observation.signalDbm != null && observation.measurablePower() == null) {
+                Text("Android reported ${observation.signalDbm} dBm, outside this radio's expected range; excluded from the index and signal chart.",
+                    style = MaterialTheme.typography.bodySmall)
+            }
             SelectionContainer {
                 Text(observation.sourceId, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
             }

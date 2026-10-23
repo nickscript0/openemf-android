@@ -2,6 +2,8 @@ package com.openemf.ui.model
 
 import com.openemf.data.database.SignalObservationEntity
 import com.openemf.sensors.api.SourceType
+import com.openemf.sensors.api.CellularTechnology
+import com.openemf.sensors.scoring.EScoreCalculator
 
 fun SourceType.label(): String = when (this) {
     SourceType.WIFI -> "Wi-Fi"
@@ -10,13 +12,32 @@ fun SourceType.label(): String = when (this) {
 }
 
 fun String.readable(): String = lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() }
-fun SignalObservationEntity.powerText(): String = signalDbm?.let { "$it dBm" } ?: "Unavailable"
+fun SignalObservationEntity.measurablePower(): Int? {
+    val range = when (sourceType) {
+        SourceType.WIFI -> EScoreCalculator.WIFI_RANGE
+        SourceType.BLUETOOTH -> EScoreCalculator.BLUETOOTH_RANGE
+        SourceType.CELLULAR -> when (cellular?.technology) {
+            CellularTechnology.GSM_2G -> EScoreCalculator.GSM_RANGE
+            CellularTechnology.CDMA_2G -> EScoreCalculator.CDMA_RANGE
+            CellularTechnology.UMTS_3G -> EScoreCalculator.WCDMA_RANGE
+            CellularTechnology.NR_5G -> EScoreCalculator.NR_RANGE
+            else -> EScoreCalculator.LTE_RANGE
+        }
+    }
+    return signalDbm?.takeIf { it in range }
+}
+fun SignalObservationEntity.powerText(): String = when {
+    signalDbm == null -> "Unavailable"
+    measurablePower() == null -> "Out of range"
+    else -> "$signalDbm dBm"
+}
 fun SignalObservationEntity.metricLabel(): String = signalMetric.replace('_', '-')
 
 fun SignalObservationEntity.technicalFields(): List<Pair<String, String>> = buildList {
     fun field(label: String, value: Any?, unit: String = "") {
         add(label to (value?.let { "$it$unit" } ?: "Unavailable"))
     }
+    field("Reported power (raw Android)", signalDbm, " dBm")
     wifi?.let { w ->
         field("BSSID", w.bssid)
         field("Frequency", w.frequencyMhz, " MHz")

@@ -5,13 +5,11 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class PermissionPolicyTest {
-    @Test fun `phone denial degrades cellular without blocking other radios`() {
-        listOf(31, 35, 37).forEach { api ->
-            val result = PermissionPolicy.evaluate(api, PermissionPolicy.required(api) - Permission.READ_PHONE_STATE)
-            assertTrue(result.canMeasure)
-            assertEquals(setOf(Modality.CELLULAR), result.degradedModalities)
-            assertTrue(Permission.READ_PHONE_STATE in result.denied)
-        }
+    @Test fun cellularNeedsPreciseLocationWithoutAnyPhonePermission() {
+        val result = PermissionPolicy.evaluate(37, setOf(Permission.FINE_LOCATION, Permission.COARSE_LOCATION))
+        assertTrue(result.canMeasure)
+        assertEquals(setOf(Modality.BLUETOOTH), result.degradedModalities)
+        assertFalse(PermissionPolicy.required(37).any { it.androidName == "android.permission.READ_PHONE_STATE" })
     }
 
     @Test fun `precise location denial allows independently granted modern Bluetooth`() {
@@ -22,14 +20,14 @@ class PermissionPolicyTest {
 
     @Test fun `coarse location alone cannot authorize modern WiFi or cell information`() {
         listOf(29, 30, 31, 35, 37).forEach {
-            val result = PermissionPolicy.evaluate(it, setOf(Permission.COARSE_LOCATION, Permission.READ_PHONE_STATE))
+            val result = PermissionPolicy.evaluate(it, setOf(Permission.COARSE_LOCATION))
             assertFalse(result.canMeasure)
             assertEquals(Modality.entries.toSet(), result.degradedModalities)
         }
     }
 
     @Test fun `legacy coarse permission is accepted for WiFi and cellular`() {
-        val result = PermissionPolicy.evaluate(26, setOf(Permission.COARSE_LOCATION, Permission.READ_PHONE_STATE))
+        val result = PermissionPolicy.evaluate(26, setOf(Permission.COARSE_LOCATION))
         assertTrue(result.canMeasure)
         assertEquals(setOf(Modality.BLUETOOTH), result.degradedModalities)
     }

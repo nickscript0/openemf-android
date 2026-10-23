@@ -44,6 +44,9 @@ class RecordingAndroidContractTest {
         assertTrue(permissions.contains(Manifest.permission.FOREGROUND_SERVICE_LOCATION))
         assertTrue(permissions.contains(Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE))
         assertFalse(permissions.contains(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+        assertFalse(permissions.contains(Manifest.permission.READ_PHONE_STATE))
+        assertFalse(permissions.contains(Manifest.permission.CALL_PHONE))
+        assertFalse(permissions.contains(Manifest.permission.ANSWER_PHONE_CALLS))
         assertFalse(permissions.contains(Manifest.permission.RECEIVE_BOOT_COMPLETED))
         assertEquals(0, app.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_ALLOW_BACKUP)
     }

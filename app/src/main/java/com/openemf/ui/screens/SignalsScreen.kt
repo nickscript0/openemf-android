@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.openemf.data.repository.observationEntities
 import com.openemf.sensors.api.*
+import com.openemf.sensors.scoring.EScoreCalculator
 import com.openemf.ui.components.TechnicalObservationCard
 import com.openemf.ui.components.observationText
 import com.openemf.ui.model.*
@@ -41,9 +42,10 @@ fun SignalsScreen(
     }
     val sources = measurement?.let { it.wifiSources + it.bluetoothSources + it.cellularSources }.orEmpty()
     val observations = remember(measurement) { measurement?.observationEntities().orEmpty().associateBy { it.sourceType to it.sourceId } }
+    val powerPolicy = remember { EScoreCalculator() }
     val filtered = sources.filter { it.type == selected && (filter.isBlank() ||
         it.id.contains(filter, true) || it.name.orEmpty().contains(filter, true)) }
-        .let { list -> if (strongestFirst) list.sortedWith(compareByDescending<Source> { it.rssi }.thenBy { it.id })
+        .let { list -> if (strongestFirst) list.sortedWith(compareByDescending<Source> { source -> source.rssi.takeIf { powerPolicy.isValidSignal(source) } }.thenBy { it.id })
             else list.sortedWith(compareBy<Source> { it.name.orEmpty() }.thenBy { it.id }) }
     val scanning = sensorState is SensorState.Scanning
     Scaffold(modifier = modifier, topBar = {
