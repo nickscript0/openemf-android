@@ -69,7 +69,9 @@ ADB confirmed Pixel 9 Pro XL, Android 17/API 37, build CP3A.261005.005 before
 installation on 2026-10-23. Wi-Fi, Bluetooth, LTE, background capture persistence,
 and notification controls have been exercised. See [device evidence](docs/DEVICE_VALIDATION.md)
 for exact checks and remaining limits; short USB-powered checks do not establish
-long-term recording reliability or battery consumption.
+long-term recording reliability or battery consumption. Follow-up
+[radio validation](docs/RADIO_VALIDATION.md) covers cached observations, live
+stale exclusion, and chart deduplication; hardware 5G validation remains pending.
 
 The app requests Android location permission for Wi-Fi/cellular scan APIs
 and Bluetooth scan/connect permissions. No Phone permission is requested: the

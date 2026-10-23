@@ -180,3 +180,17 @@ or phone compatibility as verified without actually exercising them.
   values outside the app's expected range. Both are corrected; all 182 host tests
   pass, with zero lint errors, 68 warnings, and one hint. Performed device checks
   and remaining limits are tracked in [DEVICE_VALIDATION.md](DEVICE_VALIDATION.md).
+
+## Current validation scope (2026-10-23)
+
+The user explicitly deferred interruption handling and unplugged overnight
+recording/battery tests until a future session. The active validation step is
+cached/throttled scan behavior and 5G when available. The user enabled 5G in the
+phone settings but reports that the current SIM plan is LTE-only. Do not assume
+that a 5G display indicator supplies actual NR cells or metrics. Record only
+what the app and platform return. See [RADIO_VALIDATION.md](RADIO_VALIDATION.md).
+
+The Pixel cache/cooldown, live stale exclusion, and history-chart deduplication
+checks passed. A capture-time message was clarified without changing scanning
+policy; 182 host tests pass with zero lint errors. Hardware NR measurement
+validation remains pending actual NR observations.

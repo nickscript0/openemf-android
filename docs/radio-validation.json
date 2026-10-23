@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-23",
+  "checkpoint_before_validation": "104a4a2",
+  "device": {
+    "model": "Pixel 9 Pro XL",
+    "android_release": "17",
+    "api": 37,
+    "build": "CP3A.261005.005",
+    "reconfirmed_before_testing": true
+  },
+  "deferrals_requested_by_user": [
+    "interruption handling",
+    "unplugged overnight recording and battery"
+  ],
+  "user_reported_sim_plan": "LTE only",
+  "user_enabled_5g_preference_during_test": true,
+  "initial_installed_apk_sha256": "24ffeb236d8377c5e56158ed6e43e089f64ba3b7a600af9fb975218cca244342",
+  "fresh_capture": {
+    "label": "fresh",
+    "integrity": "ok",
+    "capture_timestamp_ms": 1792754370903,
+    "radio_reports": [
+      {
+        "modality": "BLUETOOTH",
+        "status": "UPDATED",
+        "detail": "BLE and Classic discovery window completed; only discoverable devices can be measured"
+      },
+      {
+        "modality": "CELLULAR",
+        "status": "UPDATED",
+        "detail": null
+      },
+      {
+        "modality": "WIFI",
+        "status": "UPDATED",
+        "detail": null
+      }
+    ],
+    "source_counts": {
+      "WIFI": 19,
+      "BLUETOOTH": 12,
+      "CELLULAR": 1
+    },
+    "wifi_cached": 0,
+    "wifi_freshness_counts": {
+      "FRESH": 19
+    },
+    "wifi_age_ms_range": [
+      2459,
+      2459
+    ],
+    "cellular_technology_counts": {
+      "LTE_4G": 1
+    },
+    "nr_observations": []
+  },
+  "cached_capture": {
+    "label": "cached",
+    "integrity": "ok",
+    "capture_timestamp_ms": 1792754385002,
+    "radio_reports": [
+      {
+        "modality": "BLUETOOTH",
+        "status": "UPDATED",
+        "detail": "BLE and Classic discovery window completed; only discoverable devices can be measured"
+      },
+      {
+        "modality": "CELLULAR",
+        "status": "UPDATED",
+        "detail": null
+      },
+      {
+        "modality": "WIFI",
+        "status": "THROTTLED",
+        "detail": "Wi-Fi scan budget unavailable; retry in 16s"
+      }
+    ],
+    "source_counts": {
+      "WIFI": 19,
+      "BLUETOOTH": 14,
+      "CELLULAR": 1
+    },
+    "wifi_cached": 19,
+    "wifi_freshness_counts": {
+      "FRESH": 19
+    },
+    "wifi_age_ms_range": [
+      16558,
+      16558
+    ],
+    "cellular_technology_counts": {
+      "LTE_4G": 1
+    },
+    "nr_observations": []
+  },
+  "cache_comparison": {
+    "shared_wifi_sources": 19,
+    "hardware_timestamps_unchanged": 19,
+    "capture_delta_ms": 14099,
+    "age_delta_ms": 14099
+  },
+  "physical_ui_checks": {
+    "cached_stale_label_observed_seconds": 177,
+    "relative_index_unavailable_after_expiry": true,
+    "wifi_chart_appearances": 18,
+    "wifi_chart_unique_samples": 17,
+    "wifi_chart_repeated_reads_collapsed": 1,
+    "wifi_chart_excluded_appearances": 0
+  },
+  "nr_assessment": {
+    "app_technologies_returned": [
+      "LTE_4G"
+    ],
+    "platform_display_network": "LTE",
+    "platform_display_override": "NR_NSA",
+    "cellinfo_nr_in_platform_snapshot": 0,
+    "valid_nr_signal_strength_metrics_in_platform_snapshot": 0,
+    "ss_csi_fields_contained_unavailable_sentinel": true,
+    "real_nr_measurement_validation_completed": false,
+    "plan_restriction_independently_proven": false
+  },
+  "android_scan_throttling_disabled": false,
+  "app_limit_bypassed": false,
+  "android_framework_refusal_forced": false,
+  "radio_identity_data_committed": false,
+  "host_validation": {
+    "tests": {
+      "tests": 182,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "lint": {
+      "Error": 0,
+      "Warning": 68,
+      "Hint": 1
+    },
+    "build_successful": true,
+    "build_seconds": 58,
+    "actionable_tasks": 63,
+    "tasks_executed": 16,
+    "tasks_up_to_date": 47,
+    "log": "radio-build.log",
+    "omitted_native_diagnostic_lines": 46,
+    "signature_v2_verified": true,
+    "apk_sha256": "c890608fd09fb914013f4d2664f1e4457c590d26387ba3a8513639d4ebed216c",
+    "apk_size_bytes": 75964359,
+    "database_schema_changed": false,
+    "installed_apk_matches_host_artifact": true,
+    "post_update_physical_message_checked": false,
+    "post_update_physical_message_pending_reason": "Phone locked; user unlock requested."
+  }
+}

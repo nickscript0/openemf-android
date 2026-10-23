@@ -112,3 +112,11 @@ recording, actual 5G NR measurements, and a deliberate hardware cached/throttled
 scan scenario remain untested. The captures in this run were marked UPDATED or
 PARTIAL; cached/freshness policy remains covered by host tests. No calibrated
 exposure or measurement-accuracy claim follows from this validation.
+
+## Follow-up: cached/throttled scans (2026-10-23)
+
+The later [radio validation](RADIO_VALIDATION.md) exercised real cached results,
+the app cooldown, live expiry, and chart deduplication. Android framework refusal
+was not forced. The user deferred interruption and unplugged overnight tests;
+NR hardware validation remains pending actual measurements after an LTE-only
+plan report. The original APK/hash and counts above remain checkpoint evidence.

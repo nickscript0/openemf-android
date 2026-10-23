@@ -92,7 +92,7 @@ class EMFSensorModuleImpl @Inject constructor(
                         if (!wifiScanner.hasPermissions() || !wifiScanner.isAvailable()) wifiScanner.scan()
                         else if (scheduler.tryAcquireScan(measurementContext.value.isForeground || serviceRecording)) wifiScanner.scan()
                         else AcquisitionResult(wifiScanner.getCachedResults(), AcquisitionStatus.THROTTLED,
-                            "Wi-Fi scan budget unavailable; retry in ${(scheduler.getTimeUntilNextScan(measurementContext.value.isForeground || serviceRecording) + 999) / 1000}s")
+                            "Wi-Fi app scan limit: ${(scheduler.getTimeUntilNextScan(measurementContext.value.isForeground || serviceRecording) + 999) / 1000}s wait remained at request time; showing cached observations")
                     }
                 }
                 val bluetooth = async {
