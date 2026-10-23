@@ -35,9 +35,9 @@ use real observation times, and collapse repeated cache reads. Select 1-hour,
 read durable captures. Settings exports raw signal CSV through Android's document
 picker. See [technical views](docs/TECHNICAL_VIEWS.md) and [history notes](docs/HISTORY.md).
 
-This development version assumes fresh installations for all users, as agreed;
-it creates the current database schema directly and does not upgrade earlier
-development databases. Initial Pixel validation is recorded in
+This version creates Room schema 2 directly, as agreed. Obsolete prototype
+schemas have no migration path; updates using the same schema retain history.
+Initial Pixel validation is recorded in
 [device validation](docs/DEVICE_VALIDATION.md). Maps, coordinate recording, cloud
 services, and store publishing are deferred. Automatic app backup/transfer is
 excluded; raw CSV export is user-initiated.
@@ -53,11 +53,18 @@ are outside this fork's scope. Set `JAVA_HOME` and `ANDROID_HOME` for your insta
 ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
 ```
 
-The personal-install debug APK is generated at:
+For everyday personal use, build the optimized release with the external local
+signing key:
 
-```text
-app/build/outputs/apk/debug/app-debug.apk
+```sh
+python3 scripts/personal_release.py build
 ```
+
+The signed APK is `app/build/outputs/apk/personal/openemf-1.1.0-2.apk`.
+See [local release instructions](docs/RELEASE.md) for key storage, versioning,
+checks, and the in-place debug-to-release signing transition. The development
+APK remains at `app/build/outputs/apk/debug/app-debug.apk`; after rotation,
+use personal releases for updates to the everyday installation.
 
 [Acquisition notes](docs/ACQUISITION.md) describe the implementation, test coverage,
 and remaining limits. [Toolchain notes](docs/TOOLCHAIN.md) record the separate

@@ -65,6 +65,12 @@ obj/
 # Keystore files
 *.jks
 *.keystore
+*.p12
+*.pk8
+*.lineage
+keystore.properties
+signing.properties
+keystore-password.txt
 
 # External native build folder
 .cxx/

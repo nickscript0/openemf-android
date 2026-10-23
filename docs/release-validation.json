@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-23",
+  "phase": "local personal release",
+  "preceding_checkpoint": "8ea18aa",
+  "artifact": {
+    "application_id": "com.openemf.app",
+    "version_name": "1.1.0",
+    "version_code": 2,
+    "min_api": 37,
+    "debuggable": false,
+    "minified": true,
+    "resource_shrinking": true,
+    "build_tools": "37.0.0",
+    "signing_lineage_included": true,
+    "size_bytes": 8318436,
+    "sha256": "f753647ed0e5153625d23ca5119748c2be788f5b180149058136296f8216d8fd",
+    "mapping_sha256": "960dd45119d936e511889edea1464454a6cf0a78add7bbc8487639763b240101",
+    "apk": "app/build/outputs/apk/personal/openemf-1.1.0-2.apk"
+  },
+  "tests": {
+    "tests": 182,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "host_tests_variant": "debug",
+  "release_unit_tests_run": false,
+  "lint": {
+    "release": {
+      "Error": 0,
+      "Warning": 67,
+      "Hint": 1
+    },
+    "debug": {
+      "Error": 0,
+      "Warning": 67,
+      "Hint": 1
+    }
+  },
+  "build": {
+    "successful": true,
+    "seconds": 96,
+    "actionable_tasks": 103,
+    "executed": 83,
+    "up_to_date": 20,
+    "log": "release-build.log",
+    "omitted_native_diagnostic_lines": 48
+  },
+  "signing": {
+    "scheme": "v3",
+    "build_tools": "37.0.0",
+    "new_key_type": "RSA 3072",
+    "new_key_validity_days": 10000,
+    "release_certificate_sha256": "fbc906ace8918e53e4a48103e3c23c66bb7fdf2a30021f4330e54dbab3c40113",
+    "old_certificate_sha256": "547f0d5f0afafc78001d2d2f280998c1ab4b0611cc80949f2bebd91d0271de1f",
+    "old_capabilities": {
+      "installed_data": true,
+      "permission": true,
+      "shared_uid": false,
+      "rollback": false,
+      "auth": false
+    },
+    "rotation_min_api": 37,
+    "new_key_only_signing_verified": true,
+    "key_directory_outside_git": true,
+    "key_directory_mode": "0700",
+    "key_files_mode": "0600",
+    "off_machine_key_backup_created": false,
+    "secret_material_committed": false
+  },
+  "device": {
+    "model": "Pixel 9 Pro XL",
+    "android_release": "17",
+    "api": 37,
+    "build": "CP3A.261005.005",
+    "reconfirmed_before_test": true,
+    "installed_in_place": true,
+    "uninstalled": false,
+    "data_restored": false,
+    "app_id_before": 10123,
+    "app_id_after": 10123,
+    "non_debuggable_verified": true,
+    "run_as_blocked": true,
+    "installed_apk_matches_host": true,
+    "permissions_retained": [
+      "ACCESS_FINE_LOCATION",
+      "BLUETOOTH_SCAN",
+      "BLUETOOTH_CONNECT",
+      "POST_NOTIFICATIONS"
+    ],
+    "settings_version_verified": "1.1.0 (2)",
+    "new_manual_capture_saved": true,
+    "new_recording_capture_saved": true,
+    "foreground_service_types": "0x18",
+    "notification_pause_and_stop_verified": true,
+    "recording_service_stopped_at_finish": true,
+    "fatal_androidruntime_in_checked_process": false
+  },
+  "preservation": {
+    "columns": 68,
+    "exported_observations": 803,
+    "preserved_old_observations": 731,
+    "preserved_old_captures": 20,
+    "fields_compared_per_old_observation": 68,
+    "mismatched_fields": 0,
+    "new_release_observations": 72,
+    "new_release_capture_count": 2,
+    "new_release_capture_modes": {
+      "MANUAL": 33,
+      "RECORDING": 39
+    },
+    "new_release_radio_acquisitions": {
+      "BLUETOOTH:UPDATED": 2,
+      "CELLULAR:UPDATED": 2,
+      "WIFI:UPDATED": 2
+    }
+  },
+  "database_schema_version": 2,
+  "database_schema_changed": false,
+  "database_schema_sha256": "0e20bf733c5cd8a1aec26a8862e9828cda64752b97d2f744c23e902caa670089",
+  "migration_added": false,
+  "store_publication_or_google_registration_performed": false,
+  "deferred": [
+    "interruption handling",
+    "unplugged overnight reliability and battery",
+    "actual 5G NR measurements"
+  ],
+  "electrosmart_reference_modified": false,
+  "release_workflow_checks": {
+    "repeated_build_same_apk_sha256": true,
+    "versioned_r8_mapping_saved": true,
+    "in_repository_signing_directory_refused": true,
+    "existing_signing_directory_reinitialization_refused": true
+  }
+}

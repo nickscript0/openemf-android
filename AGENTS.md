@@ -14,3 +14,9 @@ Target the user's Pixel on Android 17 (minimum API 37). Do not add older-Android
 compatibility work. ADB confirmed Pixel 9 Pro XL, Android 17/API 37, build
 CP3A.261005.005 before installation on 2026-10-23. See docs/DEVICE_VALIDATION.md for performed checks
 and remaining physical validation; do not generalize a short USB-powered test.
+
+For personal releases, follow docs/RELEASE.md and reuse the external signing key
+and lineage. Preserve installed history; do not regenerate released keys or
+uninstall the app to work around signing failures. Keep secrets and raw device
+data outside Git. The everyday release is non-debuggable; use its CSV export
+for data validation instead of assuming ADB run-as access.

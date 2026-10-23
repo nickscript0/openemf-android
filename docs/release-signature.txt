@@ -1,0 +1,18 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): false
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v3.2 scheme (APK Signature Scheme v3.2): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+V3.0 Signer: certificate DN: CN=OpenEMF Personal
+V3.0 Signer: certificate SHA-256 digest: fbc906ace8918e53e4a48103e3c23c66bb7fdf2a30021f4330e54dbab3c40113
+V3.0 Signer: certificate SHA-1 digest: a11dce0c432b4a01150aeafe9bfa99ada08be08d
+V3.0 Signer: certificate MD5 digest: dd0d3952d6a91717fa014b1a638f24b7
+V3.0 Signer: key algorithm: RSA
+V3.0 Signer: key size (bits): 3072
+V3.0 Signer: public key SHA-256 digest: 75293d503198dfd0aa5d9ece7d7850566f1a210e8119704f2d0bf51c42ed05f3
+V3.0 Signer: public key SHA-1 digest: ffd4a017e10e301a3a7a6689133481e5c2963003
+V3.0 Signer: public key MD5 digest: 92cc786f7c10535826ac19839b494f2f

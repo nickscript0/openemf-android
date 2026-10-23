@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import android.os.Build
+import com.openemf.app.BuildConfig
 import com.openemf.sensors.api.Permission
 import com.openemf.sensors.api.PermissionStatus
 import com.openemf.ui.theme.ThemeMode
@@ -155,7 +156,7 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = "Version",
-                    subtitle = "1.0.0",
+                    subtitle = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                     onClick = {}
                 )
 

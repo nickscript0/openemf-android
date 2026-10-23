@@ -194,3 +194,15 @@ The Pixel cache/cooldown, live stale exclusion, and history-chart deduplication
 checks passed. A capture-time message was clarified without changing scanning
 policy; 182 host tests pass with zero lint errors. Hardware NR measurement
 validation remains pending actual NR observations.
+
+## Personal release (2026-10-23)
+
+The user authorized an entirely local, versioned everyday-use APK. Version
+1.1.0 (code 2) uses an external private signing key and a verified signing
+lineage from the installed debug certificate. The optimized non-debuggable
+release upgraded in place; CSV comparison verified all 731 prior observations
+across 20 captures with no exported-field differences. Measurements, explicit
+recording/notification controls, permissions, version display, and export were
+checked on the confirmed Pixel. No schema migration or cloud/store publication
+was added. See [RELEASE.md](RELEASE.md) for repeatable builds, private-key backup
+responsibilities, exact artifact/signature, and validation limits.
