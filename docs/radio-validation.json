@@ -147,7 +147,95 @@
     "apk_size_bytes": 75964359,
     "database_schema_changed": false,
     "installed_apk_matches_host_artifact": true,
-    "post_update_physical_message_checked": false,
-    "post_update_physical_message_pending_reason": "Phone locked; user unlock requested."
+    "post_update_physical_message_checked": true
+  },
+  "updated_apk_recheck": {
+    "fresh_capture": {
+      "label": "updated-fresh",
+      "integrity": "ok",
+      "capture_timestamp_ms": 1792755064799,
+      "radio_reports": [
+        {
+          "modality": "BLUETOOTH",
+          "status": "UPDATED",
+          "detail": "BLE and Classic discovery window completed; only discoverable devices can be measured"
+        },
+        {
+          "modality": "CELLULAR",
+          "status": "UPDATED",
+          "detail": null
+        },
+        {
+          "modality": "WIFI",
+          "status": "UPDATED",
+          "detail": null
+        }
+      ],
+      "source_counts": {
+        "WIFI": 21,
+        "BLUETOOTH": 12,
+        "CELLULAR": 1
+      },
+      "wifi_cached": 0,
+      "wifi_freshness_counts": {
+        "FRESH": 21
+      },
+      "wifi_age_ms_range": [
+        2454,
+        2454
+      ],
+      "cellular_technology_counts": {
+        "LTE_4G": 1
+      },
+      "nr_observations": []
+    },
+    "cached_capture": {
+      "label": "updated-cached",
+      "integrity": "ok",
+      "capture_timestamp_ms": 1792755074162,
+      "radio_reports": [
+        {
+          "modality": "BLUETOOTH",
+          "status": "UPDATED",
+          "detail": "BLE and Classic discovery window completed; only discoverable devices can be measured"
+        },
+        {
+          "modality": "CELLULAR",
+          "status": "UPDATED",
+          "detail": null
+        },
+        {
+          "modality": "WIFI",
+          "status": "THROTTLED",
+          "detail": "Wi-Fi app scan limit: 21s wait remained at request time; showing cached observations"
+        }
+      ],
+      "source_counts": {
+        "WIFI": 21,
+        "BLUETOOTH": 14,
+        "CELLULAR": 1
+      },
+      "wifi_cached": 21,
+      "wifi_freshness_counts": {
+        "FRESH": 21
+      },
+      "wifi_age_ms_range": [
+        11819,
+        11819
+      ],
+      "cellular_technology_counts": {
+        "LTE_4G": 1
+      },
+      "nr_observations": []
+    },
+    "shared_wifi_hardware_timestamps_unchanged": 21,
+    "capture_delta_ms": 9363,
+    "age_deltas_ms": [
+      9365
+    ],
+    "message_observed_on_phone": true,
+    "cellular_remained_lte_only": true,
+    "foreground_recording_started": false,
+    "current_process_fatal_androidruntime": false
   }
 }

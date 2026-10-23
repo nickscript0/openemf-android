@@ -73,4 +73,11 @@ The log omits native host frame-timing diagnostics and normalizes local paths.
 The updated APK's v2 signature verified, and its installed bytes matched the
 host artifact. Size: 75,964,359 bytes; SHA-256:
 `c890608fd09fb914013f4d2664f1e4457c590d26387ba3a8513639d4ebed216c`.
-Post-update physical message verification is pending phone unlock.
+After the user unlocked the phone, two measurements were repeated on the exact
+updated APK. The first returned Wi-Fi UPDATED with 21 fresh observations; the
+second returned THROTTLED with all 21 marked cached and the same hardware
+timestamps. Their ages increased from 2,454 to 11,819 ms. The phone displayed:
+“Wi-Fi app scan limit: 21s wait remained at request time; showing cached
+observations.” Bluetooth and cellular again returned UPDATED independently;
+cellular remained LTE-only. Both database copies passed integrity checks. No
+recording session was started during this pass.
